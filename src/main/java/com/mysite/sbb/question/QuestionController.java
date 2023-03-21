@@ -53,8 +53,8 @@ public class QuestionController {
             return "question_form";
         }
         SiteUser siteUser = this.userService.getUser(principal.getName());
-        this.questionService.create(questionForm.getSubject(), questionForm.getContent(),siteUser);
-        return "redirect:/question/list";
+        Question q = this.questionService.create(questionForm.getSubject(), questionForm.getContent(),siteUser);
+        return "redirect:/question/detail/"+ q.getId();
     }
 
     @PreAuthorize("isAuthenticated()")
