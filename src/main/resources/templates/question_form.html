@@ -10,9 +10,16 @@
         </div>
         <div class="mb-3">
             <label for="content" class="form-label">내용</label>
-            <textarea th:field="*{content}" class="form-control" rows="10"></textarea>
+            <textarea id ="editor" th:field="*{content}" class="form-control" rows="10"></textarea>
         </div>
         <input type="submit" value="저장하기" class="btn btn-primary my-2">
     </form>
 </div>
 </html>
+
+<script>
+    var simplemde = new SimpleMDE({
+        element: document.getElementById("editor"),
+        spellChecker: false
+    });
+</script>
