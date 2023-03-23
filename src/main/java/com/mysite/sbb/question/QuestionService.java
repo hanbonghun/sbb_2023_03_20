@@ -29,8 +29,8 @@ public class QuestionService {
 
 
 
-    public Page<Question> getList(int page,String kw) {
-        Pageable pageable = PageRequest.of(page-1,10,Sort.by("createDate").descending());
+    public Page<Question> getList(int page,int pageSize, String kw) {
+        Pageable pageable = PageRequest.of(page-1,pageSize,Sort.by("createDate").descending());
         Specification<Question> spec = search(kw);
         return this.questionRepository.findAll(spec,pageable);
     }

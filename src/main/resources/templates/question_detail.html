@@ -37,9 +37,11 @@
   <!-- 답변의 갯수 표시 -->
   <h5 class="border-bottom my-3 py-2"
       th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다.|"></h5>
+  <a th:id="first"></a>
+
   <!-- 답변 반복 시작 -->
-  <div class="card my-3" th:each="answer : ${question.answerList}">
-    <a th:id="|answer_${answer.id}|"></a>
+  <div class="card my-3" th:each="answer : ${paging.content}">
+    <a th:id="start"></a>
 
     <div class="card-body">
       <div class="card-text" th:utext="${@commonUtil.markdown(answer.content)}"></div>
@@ -74,6 +76,27 @@
     </div>
   </div>
   <!-- 답변 반복 끝  -->
+  <div th:if="${!paging.isEmpty()}">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" th:if="${paging.hasPrevious}" >
+        <a class="page-link" th:href="@{|?page=${paging.number}#start|}">
+          <span>이전</span>
+        </a>
+      </li>
+      <li th:each="page: ${#numbers.sequence(paging.number/pageSize*pageSize, (paging.number/pageSize+1)*pageSize-1)}"
+          th:classappend="${page == paging.number} ? 'active'"
+          th:if="${page<paging.totalPages}"
+          class="page-item"
+      >
+        <a th:text="${page+1}" class="page-link" th:href="@{|?page=${page+1}#start|}"></a>
+      </li>
+      <li class="page-item" th:if="${paging.hasNext()}" >
+        <a class="page-link" th:href="@{|?page=${paging.number+2}#start|}">
+          <span>다음</span>
+        </a>
+      </li>
+    </ul>
+  </div>
   <!-- 답변 작성 -->
   <form th:action="@{|/answer/create/${question.id}|}" th:object="${answerForm}" method="post" class="my-3">
     <div th:replace="~{form_errors :: formErrorsFragment}"></div>

@@ -23,7 +23,7 @@
             </thead>
             <tbody>
             <tr th:each="question, loop : ${paging}">
-                <td th:text="${paging.getTotalElements()  -paging.number*10 - loop.count +1 }"></td>
+                <td th:text="${paging.getTotalElements()  -paging.number*pageSize - loop.count +1 }"></td>
                 <td>
                     <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
                     <span class="text-danger small ms-2"
@@ -44,7 +44,7 @@
                         <span>이전</span>
                     </a>
                 </li>
-                <li th:each="page: ${#numbers.sequence(paging.number/10*10, (paging.number/10+1)*10-1)}"
+                <li th:each="page: ${#numbers.sequence(paging.number/pageSize*pageSize, (paging.number/pageSize+1)*pageSize-1)}"
                     th:classappend="${page == paging.number} ? 'active'"
                     th:if="${page<paging.totalPages}"
                     class="page-item"

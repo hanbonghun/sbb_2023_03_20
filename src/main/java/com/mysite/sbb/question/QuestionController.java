@@ -7,6 +7,9 @@ import com.mysite.sbb.user.SiteUser;
 import com.mysite.sbb.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +23,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
+
 
 @RequestMapping("/question")
 @RequiredArgsConstructor
@@ -44,16 +48,24 @@ public class QuestionController {
 
     @GetMapping("/list")
     public String list(Model model, @RequestParam(value="page", defaultValue="1") int page,    @RequestParam(value = "kw", defaultValue = "") String kw) {
-        Page<Question> paging = this.questionService.getList(page,kw);
+        int pageSize=10;
+        Page<Question> paging = this.questionService.getList(page,pageSize,kw);
         model.addAttribute("paging", paging);
+        model.addAttribute("pageSize",pageSize);
         model.addAttribute("kw", kw);
         return "question_list";
     }
 
     @GetMapping(value = "/detail/{id}")
-    public String detail(Model model, @PathVariable("id") Integer id,  AnswerForm answerForm,Principal principal) {
+    public String detail(Model model, @PathVariable("id") Integer id,  @RequestParam(value = "page", defaultValue = "1")int page, AnswerForm answerForm,Principal principal) {
         Question question = this.questionService.getQuestion(id);
+        int pageSize = 5;
+        Pageable pageable = PageRequest.of(page-1, pageSize, Sort.by(Sort.Direction.DESC, "createDate"));
+        Page<Answer> paging = question.getAnswers(pageable);
+        System.out.println(paging.getSize());
         model.addAttribute("question", question);
+        model.addAttribute("paging",paging);
+        model.addAttribute("pageSize",pageSize);
         SiteUser siteUser = getSiteUser(principal);
         model.addAttribute("siteUser",siteUser);
         return "question_detail";

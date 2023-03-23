@@ -5,6 +5,10 @@ import com.mysite.sbb.user.SiteUser;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +30,12 @@ public class Question {
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<Answer> answerList;
+
+    public Page<Answer> getAnswers(Pageable pageable) {
+        int start = (int)pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), answerList.size());
+        return new PageImpl<>(answerList.subList(start, end), pageable, answerList.size());
+    }
 
     @ManyToOne
     private SiteUser author;
