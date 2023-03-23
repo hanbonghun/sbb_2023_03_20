@@ -53,6 +53,7 @@ public class QuestionController {
         model.addAttribute("paging", paging);
         model.addAttribute("pageSize",pageSize);
         model.addAttribute("kw", kw);
+        model.addAttribute("category","질문과 답변");
         return "question_list";
     }
 
