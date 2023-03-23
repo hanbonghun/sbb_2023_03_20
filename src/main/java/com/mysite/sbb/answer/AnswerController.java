@@ -8,6 +8,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,13 +26,24 @@ public class AnswerController {
     private final QuestionService questionService;
     private final AnswerService answerService;
     private final UserService userService;
-
+    private SiteUser getSiteUser(Principal principal) {
+        SiteUser siteUser = null;
+        if (principal instanceof OAuth2AuthenticationToken) {
+            OAuth2User oAuth2User = ((OAuth2AuthenticationToken) principal).getPrincipal();
+            String email = oAuth2User.getAttribute("email");
+            siteUser = this.userService.findByEmail(email);
+            siteUser.setGoogleId(email);
+        } else if(principal instanceof UserDetails){
+            siteUser = this.userService.getUser(principal.getName());
+        }
+        return siteUser;
+    }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/create/{id}")
     public String createAnswer(Model model, @PathVariable("id") Integer id, @Valid AnswerForm answerForm, BindingResult bindingResult, Principal principal){
         Question question = this.questionService.getQuestion(id);
-        SiteUser siteUser = this.userService.getUser(principal.getName());
+        SiteUser siteUser = getSiteUser(principal);
         if (bindingResult.hasErrors()) {
             model.addAttribute("question", question);
             return "question_detail";
@@ -44,7 +58,8 @@ public class AnswerController {
     @GetMapping("/modify/{id}")
     public String answerModify(AnswerForm answerForm, @PathVariable("id") Integer id, Principal principal) {
         Answer answer = this.answerService.getAnswer(id);
-        if (!answer.getAuthor().getUsername().equals(principal.getName())) {
+        SiteUser siteUser = getSiteUser(principal);
+        if (!answer.getAuthor().getUsername().equals(siteUser.getUsername())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
         answerForm.setContent(answer.getContent());
@@ -59,7 +74,9 @@ public class AnswerController {
             return "answer_form";
         }
         Answer answer = this.answerService.getAnswer(id);
-        if (!answer.getAuthor().getUsername().equals(principal.getName())) {
+        SiteUser siteUser = getSiteUser(principal);
+
+        if (!answer.getAuthor().getUsername().equals(siteUser.getUsername())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
         this.answerService.modify(answer, answerForm.getContent());
@@ -70,7 +87,8 @@ public class AnswerController {
     @GetMapping("/delete/{id}")
     public String answerDelete(Principal principal, @PathVariable("id") Integer id) {
         Answer answer = this.answerService.getAnswer(id);
-        if (!answer.getAuthor().getUsername().equals(principal.getName())) {
+        SiteUser siteUser = getSiteUser(principal);
+        if (!answer.getAuthor().getUsername().equals(siteUser.getUsername())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제권한이 없습니다.");
         }
         this.answerService.delete(answer);
@@ -82,7 +100,7 @@ public class AnswerController {
     @GetMapping("/vote/{id}")
     public String answerVote(Principal principal, @PathVariable("id") Integer id) {
         Answer answer = this.answerService.getAnswer(id);
-        SiteUser siteUser = this.userService.getUser(principal.getName());
+        SiteUser siteUser = getSiteUser(principal);
         this.answerService.vote(answer, siteUser);
         return String.format("redirect:/question/detail/%s#answer_%s",
                 answer.getQuestion().getId(), answer.getId());    }

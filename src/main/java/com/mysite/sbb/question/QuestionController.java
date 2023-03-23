@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
@@ -35,7 +36,7 @@ public class QuestionController {
             String email = oAuth2User.getAttribute("email");
             siteUser = this.userService.findByEmail(email);
             siteUser.setGoogleId(email);
-        } else {
+        } else if(principal instanceof UserDetails) {
             siteUser = this.userService.getUser(principal.getName());
         }
         return siteUser;
