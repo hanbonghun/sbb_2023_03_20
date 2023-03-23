@@ -27,6 +27,8 @@ import org.springframework.data.jpa.domain.Specification;
 public class QuestionService {
     private final QuestionRepository questionRepository;
 
+
+
     public Page<Question> getList(int page,String kw) {
         Pageable pageable = PageRequest.of(page-1,10,Sort.by("createDate").descending());
         Specification<Question> spec = search(kw);

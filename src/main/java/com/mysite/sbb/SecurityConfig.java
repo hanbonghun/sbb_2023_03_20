@@ -1,5 +1,7 @@
 package com.mysite.sbb;
 
+import com.mysite.sbb.user.Oauth2UserSecurityService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +19,8 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableMethodSecurity(prePostEnabled = true)
 //EnableWebSecurity 애너테이션을 사용하면 내부적으로 SpringSecurityFilterChain이 동작하여 URL 필터가 적용된다., spring security 활성화
 public class SecurityConfig {
+    @Autowired
+    private Oauth2UserSecurityService oauth2UserService;
     @Bean
         //인증되지 않은 모든 요청 허용
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -27,10 +31,18 @@ public class SecurityConfig {
                 .loginPage("/user/login")
                 .defaultSuccessUrl("/")
                 .and()
+                .oauth2Login()
+                .loginPage("/user/login")
+                .userInfoEndpoint()
+                .userService(oauth2UserService)
+                .and()
+                .defaultSuccessUrl("/")
+                .and()
                 .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
                 .logoutSuccessUrl("/")
                 .invalidateHttpSession(true);
+
         return http.build();
     }
 

@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +28,19 @@ public class QuestionController {
     private final UserService userService;
     private final AnswerService answerService;
 
+    private SiteUser getSiteUser(Principal principal) {
+        SiteUser siteUser = null;
+        if (principal instanceof OAuth2AuthenticationToken) {
+            OAuth2User oAuth2User = ((OAuth2AuthenticationToken) principal).getPrincipal();
+            String email = oAuth2User.getAttribute("email");
+            siteUser = this.userService.findByEmail(email);
+            siteUser.setGoogleId(email);
+        } else {
+            siteUser = this.userService.getUser(principal.getName());
+        }
+        return siteUser;
+    }
+
     @GetMapping("/list")
     public String list(Model model, @RequestParam(value="page", defaultValue="1") int page,    @RequestParam(value = "kw", defaultValue = "") String kw) {
         Page<Question> paging = this.questionService.getList(page,kw);
@@ -35,9 +50,11 @@ public class QuestionController {
     }
 
     @GetMapping(value = "/detail/{id}")
-    public String detail(Model model, @PathVariable("id") Integer id,  AnswerForm answerForm) {
+    public String detail(Model model, @PathVariable("id") Integer id,  AnswerForm answerForm,Principal principal) {
         Question question = this.questionService.getQuestion(id);
         model.addAttribute("question", question);
+        SiteUser siteUser = getSiteUser(principal);
+        model.addAttribute("siteUser",siteUser);
         return "question_detail";
     }
 
@@ -53,7 +70,7 @@ public class QuestionController {
         if (bindingResult.hasErrors()) {
             return "question_form";
         }
-        SiteUser siteUser = this.userService.getUser(principal.getName());
+        SiteUser siteUser = getSiteUser(principal);
         Question q = this.questionService.create(questionForm.getSubject(), questionForm.getContent(),siteUser);
         return "redirect:/question/detail/"+ q.getId();
     }
@@ -62,7 +79,8 @@ public class QuestionController {
     @GetMapping("/modify/{id}")
     public String questionModify(QuestionForm questionForm, @PathVariable("id") Integer id, Principal principal) {
         Question question = this.questionService.getQuestion(id);
-        if(!question.getAuthor().getUsername().equals(principal.getName())) {
+        SiteUser siteUser = getSiteUser(principal);
+        if(!question.getAuthor().getUsername().equals(siteUser.getUsername())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
         questionForm.setSubject(question.getSubject());
@@ -78,7 +96,9 @@ public class QuestionController {
             return "question_form";
         }
         Question question = this.questionService.getQuestion(id);
-        if (!question.getAuthor().getUsername().equals(principal.getName())) {
+        SiteUser siteUser = getSiteUser(principal);
+
+        if (!question.getAuthor().getUsername().equals(siteUser.getUsername())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
         this.questionService.modify(question, questionForm.getSubject(), questionForm.getContent());
@@ -89,7 +109,9 @@ public class QuestionController {
     @GetMapping("/delete/{id}")
     public String questionDelete(Principal principal, @PathVariable("id") Integer id) {
         Question question = this.questionService.getQuestion(id);
-        if (!question.getAuthor().getUsername().equals(principal.getName())) {
+        SiteUser siteUser = getSiteUser(principal);
+
+        if (!question.getAuthor().getUsername().equals(siteUser.getUsername())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제권한이 없습니다.");
         }
         this.questionService.delete(question);
@@ -100,7 +122,7 @@ public class QuestionController {
     @GetMapping("/vote/{id}")
     public String questionVote(Principal principal, @PathVariable("id") Integer id) {
         Question question = this.questionService.getQuestion(id);
-        SiteUser siteUser = this.userService.getUser(principal.getName());
+        SiteUser siteUser = getSiteUser(principal);
         this.questionService.vote(question, siteUser);
         return String.format("redirect:/question/detail/%s", id);
     }

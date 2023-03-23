@@ -32,4 +32,15 @@ public class UserService {
             throw new DataNotFoundException("siteuser not found");
         }
     }
+
+    public SiteUser findByEmail(String email){
+        Optional<SiteUser> siteUser = this.userRepository.findByEmail(email);
+        if(siteUser.isPresent()){
+            SiteUser user = siteUser.get();
+            if(user.getGoogleId()==null) user.setGoogleId(email);
+            return user;
+        }else{
+            throw new DataNotFoundException("siteuser not found");
+        }
+    }
 }
