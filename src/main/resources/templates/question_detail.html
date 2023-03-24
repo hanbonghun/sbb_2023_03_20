@@ -25,11 +25,11 @@
         </a>
         <a th:href="@{|/question/modify/${question.id}|}" class="btn btn-sm btn-outline-secondary"
            sec:authorize="isAuthenticated()"
-           th:if="${question.author != null and siteUser.username == question.author.username}"
+           th:if="${siteUser!=null and question.author != null and siteUser.username == question.author.username}"
            th:text="수정"></a>
         <a href="javascript:void(0);" th:data-uri="@{|/question/delete/${question.id}|}"
            class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
-           th:if="${question.author != null and siteUser.username == question.author.username}"
+           th:if="${siteUser!=null and question.author != null and siteUser.username == question.author.username}"
            th:text="삭제"></a>
       </div>
     </div>
@@ -42,6 +42,7 @@
   <!-- 답변 반복 시작 -->
   <div class="card my-3" th:each="answer : ${paging.content}">
     <a th:id="start"></a>
+    <a th:id="|answer_${answer.id}|"></a>
 
     <div class="card-body">
       <div class="card-text" th:utext="${@commonUtil.markdown(answer.content)}"></div>
@@ -65,12 +66,12 @@
         </a>
         <a th:href="@{|/answer/modify/${answer.id}|}" class="btn btn-sm btn-outline-secondary"
            sec:authorize="isAuthenticated()"
-           th:if="${answer.author != null and siteUser.username == answer.author.username}"
+           th:if="${siteUser!=null and answer.author != null and siteUser.username == answer.author.username}"
            th:text="수정">
         </a>
         <a href="javascript:void(0);" th:data-uri="@{|/answer/delete/${answer.id}|}"
            class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
-           th:if="${answer.author != null and siteUser.username == answer.author.username}"
+           th:if="${siteUser!=null and answer.author != null and siteUser.username == answer.author.username}"
            th:text="삭제"></a>
       </div>
     </div>

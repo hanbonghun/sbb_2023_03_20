@@ -1,9 +1,14 @@
 <html layout:decorate="~{layout}">
 <div layout:fragment="content" class="container my-3">
     <div class="row my-3">
-        <h1 th:text="${category}"></h1>
+        <h1 th:switch="${category}">
+            <p th:case="'qna'">질문 게시판</p>
+            <p th:case="'free'">자유 게시판</p>
+            <p th:case="'tips'">학습 노하우</p>
+<!--            <p th:case-default>기타게시판</p>-->
+        </h1>
         <div class="col-6">
-            <a th:href="@{/question/create}" class="btn btn-primary">질문 등록하기</a>
+            <a th:href="@{/question/create(category=${category})}" class="btn btn-primary">질문 등록하기</a>
         </div>
         <div class="col-6">
             <div class="input-group">
@@ -63,6 +68,7 @@
         <!-- 페이징처리 끝 -->
         <form th:action="@{/question/list}" method="get" id="searchForm">
             <input type="hidden" id="kw" name="kw" th:value="${kw}">
+            <input type="hidden" id="category" name="category" th:value="${category}">
             <input type="hidden" id="page" name="page" th:value="${paging.number}">
         </form>
 
@@ -79,6 +85,7 @@
     btn_search.addEventListener('click', function() {
         document.getElementById('kw').value = document.getElementById('search_kw').value;
         document.getElementById('page').value = 1;  // 검색버튼을 클릭할 경우 0페이지부터 조회한다.
+        document.getElementById('category').value = document.getElementById('category').value;;
         document.getElementById('searchForm').submit();
     });
 </script>

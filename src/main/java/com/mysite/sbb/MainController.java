@@ -19,15 +19,14 @@ public class MainController {
         return "redirect:/question/list";
     }
 
-    @GetMapping("/free")
-    public String list(Model model, @RequestParam(value="page", defaultValue="1") int page, @RequestParam(value = "kw", defaultValue = "") String kw) {
-        int pageSize=10;
-        Page<Question> paging = this.questionService.getList(page,pageSize,kw);
-        model.addAttribute("paging", paging);
-        model.addAttribute("pageSize",pageSize);
-        model.addAttribute("kw", kw);
-        model.addAttribute("category","자유게시판");
-        return "question_list";
+    @GetMapping("/study")
+    public String study(){
+        return "study_list";
+    }
+
+    @GetMapping("/tips")
+    public String tip(){
+        return "study_list";
     }
 
 }

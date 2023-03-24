@@ -36,6 +36,7 @@ public class Question {
         int end = Math.min((start + pageable.getPageSize()), answerList.size());
         return new PageImpl<>(answerList.subList(start, end), pageable, answerList.size());
     }
+    private String category;
 
     @ManyToOne
     private SiteUser author;

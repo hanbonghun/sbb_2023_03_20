@@ -29,9 +29,9 @@ public class QuestionService {
 
 
 
-    public Page<Question> getList(int page,int pageSize, String kw) {
+    public Page<Question> getList(int page,int pageSize, String kw,String category) {
         Pageable pageable = PageRequest.of(page-1,pageSize,Sort.by("createDate").descending());
-        Specification<Question> spec = search(kw);
+        Specification<Question> spec = search(kw,category);
         return this.questionRepository.findAll(spec,pageable);
     }
 
@@ -44,12 +44,13 @@ public class QuestionService {
         }
     }
 
-    public Question create(String subject, String content, SiteUser user) {
+    public Question create(String subject, String content, SiteUser user, String category) {
         Question q = new Question();
         q.setSubject(subject);
         q.setContent(content);
         q.setCreateDate(LocalDateTime.now());
         q.setAuthor(user);
+        q.setCategory(category);
         Question n = this.questionRepository.save(q);
         return n;
     }
@@ -70,7 +71,7 @@ public class QuestionService {
         this.questionRepository.save(question);
     }
 
-    private Specification<Question> search(String kw) {
+    private Specification<Question> search(String kw, String category) {
         return new Specification<>() {
             private static final long serialVersionUID = 1L;
             @Override
@@ -79,11 +80,14 @@ public class QuestionService {
                 Join<Question, SiteUser> u1 = q.join("author", JoinType.LEFT);
                 Join<Question, Answer> a = q.join("answerList", JoinType.LEFT);
                 Join<Answer, SiteUser> u2 = a.join("author", JoinType.LEFT);
-                return cb.or(cb.like(q.get("subject"), "%" + kw + "%"), // 제목
-                        cb.like(q.get("content"), "%" + kw + "%"),      // 내용
-                        cb.like(u1.get("username"), "%" + kw + "%"),    // 질문 작성자
-                        cb.like(a.get("content"), "%" + kw + "%"),      // 답변 내용
-                        cb.like(u2.get("username"), "%" + kw + "%"));   // 답변 작성자
+                return cb.and(
+                        cb.or(cb.like(q.get("subject"), "%" + kw + "%"), // 제목
+                                cb.like(q.get("content"), "%" + kw + "%"),      // 내용
+                                cb.like(u1.get("username"), "%" + kw + "%"),    // 질문 작성자
+                                cb.like(a.get("content"), "%" + kw + "%"),      // 답변 내용
+                                cb.like(u2.get("username"), "%" + kw + "%")),   // 답변 작성자
+                        cb.equal(q.get("category"), category));
+
             }
         };
     }

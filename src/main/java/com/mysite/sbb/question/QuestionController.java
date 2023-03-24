@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -40,20 +41,20 @@ public class QuestionController {
             String email = oAuth2User.getAttribute("email");
             siteUser = this.userService.findByEmail(email);
             siteUser.setGoogleId(email);
-        } else if(principal instanceof UserDetails) {
+        } else if(principal instanceof UsernamePasswordAuthenticationToken) {
             siteUser = this.userService.getUser(principal.getName());
         }
         return siteUser;
     }
 
     @GetMapping("/list")
-    public String list(Model model, @RequestParam(value="page", defaultValue="1") int page,    @RequestParam(value = "kw", defaultValue = "") String kw) {
+    public String list(Model model, @RequestParam(value="page", defaultValue="1") int page,    @RequestParam(value = "kw", defaultValue = "") String kw, @RequestParam(value="category", defaultValue = "qna") String category) {
         int pageSize=10;
-        Page<Question> paging = this.questionService.getList(page,pageSize,kw);
+        Page<Question> paging = this.questionService.getList(page,pageSize,kw,category);
         model.addAttribute("paging", paging);
         model.addAttribute("pageSize",pageSize);
         model.addAttribute("kw", kw);
-        model.addAttribute("category","질문과 답변");
+        model.addAttribute("category",category);
         return "question_list";
     }
 
@@ -63,29 +64,30 @@ public class QuestionController {
         int pageSize = 5;
         Pageable pageable = PageRequest.of(page-1, pageSize, Sort.by(Sort.Direction.DESC, "createDate"));
         Page<Answer> paging = question.getAnswers(pageable);
-        System.out.println(paging.getSize());
         model.addAttribute("question", question);
         model.addAttribute("paging",paging);
         model.addAttribute("pageSize",pageSize);
         SiteUser siteUser = getSiteUser(principal);
+        if(siteUser!=null) System.out.println(siteUser.getUsername());
         model.addAttribute("siteUser",siteUser);
         return "question_detail";
     }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/create")
-    public String questionCreate(QuestionForm questionForm){
+    public String questionCreate(Model model,QuestionForm questionForm, @RequestParam(value ="category") String category){
+        model.addAttribute("category", category);
         return "question_form";
     }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/create")
-    public String questionCreate(@Valid QuestionForm questionForm, BindingResult bindingResult, Principal principal) {
+    public String questionCreate(@Valid QuestionForm questionForm, BindingResult bindingResult, Principal principal, @RequestParam(value ="category") String category) {
         if (bindingResult.hasErrors()) {
             return "question_form";
         }
         SiteUser siteUser = getSiteUser(principal);
-        Question q = this.questionService.create(questionForm.getSubject(), questionForm.getContent(),siteUser);
+        Question q = this.questionService.create(questionForm.getSubject(), questionForm.getContent(),siteUser, category);
         return "redirect:/question/detail/"+ q.getId();
     }
 
