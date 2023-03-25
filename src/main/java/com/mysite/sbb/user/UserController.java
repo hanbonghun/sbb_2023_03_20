@@ -62,7 +62,6 @@ public class UserController {
 
     @GetMapping("/login/oauth2/code/google")
     public String signupNickname(@RequestParam String code){
-        System.out.println("성공"+code);
         return "";
     }
 
@@ -82,10 +81,8 @@ public class UserController {
         System.out.println("providerName = " + provider);
         System.out.println("providerId get = " + providerId);
         if(provider.equals("google")){
-            System.out.println("구글 ㅎㅇ");
             siteUser = this.userService.findByGoogleId(providerId);
         }
-        System.out.println("사용자 존재 유무"+ siteUser);
         //이미 소셜 계정이 가입되어 있다면
         if(siteUser==null) return "signup_nickname_form";
         else  return "redirect:/";
@@ -99,10 +96,8 @@ public class UserController {
         }
         OAuth2User oAuth2User = ((OAuth2AuthenticationToken) principal).getPrincipal();
         String email = oAuth2User.getAttribute("email");
-        System.out.println("principal.getName() = " + principal.getName());
         String google_id = oAuth2User.getAttribute("sub");
         this.userService.createGoogleUser(email,userCreateForm.getNickname(), google_id);
-        System.out.println("생성완료");
         return "redirect:/";
     }
 

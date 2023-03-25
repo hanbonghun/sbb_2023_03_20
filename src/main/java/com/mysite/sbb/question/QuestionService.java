@@ -91,4 +91,10 @@ public class QuestionService {
             }
         };
     }
+
+    public void increaseViews(Integer id) {
+        Question question= this.questionRepository.findById(id).get();
+        question.setViewCount(question.getViewCount()+1);
+        this.questionRepository.save(question);
+    }
 }

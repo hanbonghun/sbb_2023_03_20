@@ -59,7 +59,6 @@ public class UserService {
         System.out.println("google_id = " + google_id);
         if(siteUser.isPresent()){
             SiteUser user = siteUser.get();
-            System.out.println("사용자 있어요");
             return user;
         }else{
             return null;

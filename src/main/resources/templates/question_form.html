@@ -1,6 +1,11 @@
 <html layout:decorate="~{layout}">
 <div layout:fragment="content" class="container">
-    <h5 class="my-3 border-bottom pb-2">질문등록</h5>
+    <h1 th:switch="${category}">
+        <p th:case="'qna'" style="padding-top: 10px">질문 게시판</p>
+        <p th:case="'free'" style="padding-top: 10px">자유 게시판</p>
+        <p th:case="'tips'" style="padding-top: 10px">학습 노하우</p>
+        <!--            <p th:case-default>기타게시판</p>-->
+    </h1>    <h5 class="my-3 border-bottom pb-2">글 등록</h5>
     <form th:object="${questionForm}" method="post">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
         <div th:replace="~{form_errors :: formErrorsFragment}"></div>

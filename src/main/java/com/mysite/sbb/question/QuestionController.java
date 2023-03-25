@@ -5,7 +5,9 @@ import com.mysite.sbb.answer.AnswerForm;
 import com.mysite.sbb.answer.AnswerService;
 import com.mysite.sbb.user.SiteUser;
 import com.mysite.sbb.user.UserService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,14 +54,18 @@ public class QuestionController {
         }
         return siteUser;
     }
-    // 현재 세션으로 페이지에 접속한 적이 있는지를 확인
-    private boolean isHit(HttpServletRequest req, String viewKey){
-        return (String)req.getSession().getAttribute(viewKey) != null;
-    }
-
-    // 현재 세션으로 페이지에 처음 접속한다면 viewKey를 key로 추가
-    private void setHit(HttpServletRequest req, String viewKey){
-        req.getSession().setAttribute(viewKey,true);
+    // 쿠키에서 중복 방문 체크
+    private boolean isHit(HttpServletRequest req, String viewKey) {
+        // 쿠키 가져오기
+        Cookie[] cookies = req.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(viewKey)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @GetMapping("/list")
@@ -74,24 +80,33 @@ public class QuestionController {
     }
 
     @GetMapping(value = "/detail/{id}")
-    public String detail(Model model,HttpServletRequest req, @PathVariable("id") Integer id, @RequestParam(value = "page", defaultValue = "1")int page, AnswerForm answerForm,Principal principal) {
+    public String detail(Model model, HttpServletRequest req, HttpServletResponse res, @PathVariable("id") Integer id, @RequestParam(value = "page", defaultValue = "1")int page, @RequestParam(value = "category", required = false) String category,AnswerForm answerForm, Principal principal) {
         Question question = this.questionService.getQuestion(id);
         // 한 페이지당 출력할 답변의 개수
         int pageSize = 5;
         Pageable pageable = PageRequest.of(page-1, pageSize, Sort.by(Sort.Direction.DESC, "createDate"));
         Page<Answer> paging = question.getAnswers(pageable);
+        // 현재 로그인된 사용자 정보 확인
+        SiteUser siteUser = getSiteUser(principal);
+        //조회수
+        String viewKey = "_q" + id;
+
+        if (!isHit(req, viewKey)) { // 현재 세션으로 처음 방문
+            // 쿠키 생성
+            Cookie viewCookie = new Cookie(viewKey, "true");
+            // 쿠키 유효기간 설정 (1일)
+            viewCookie.setMaxAge(60 * 60 * 24);
+            // 쿠키 적용
+            res.addCookie(viewCookie);
+
+            // 조회수 증가
+            questionService.increaseViews(id);
+        }
+        model.addAttribute("siteUser",siteUser);
         model.addAttribute("question", question);
         model.addAttribute("paging",paging);
         model.addAttribute("pageSize",pageSize);
-        // 현재 로그인된 사용자 정보 확인
-        SiteUser siteUser = getSiteUser(principal);
-        model.addAttribute("siteUser",siteUser);
-
-        //조회수
-        String viewKey = "_q"+id;
-        if(!isHit(req,viewKey)){  //현재 세션으로 처음 방문
-
-        }
+        model.addAttribute("category",category);
         return "question_detail";
     }
 
@@ -110,7 +125,7 @@ public class QuestionController {
         }
         SiteUser siteUser = getSiteUser(principal);
         Question q = this.questionService.create(questionForm.getSubject(), questionForm.getContent(),siteUser, category);
-        return "redirect:/question/detail/"+ q.getId();
+        return "redirect:/question/detail/"+ q.getId()+"?category="+category;
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -145,7 +160,7 @@ public class QuestionController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{id}")
-    public String questionDelete(Principal principal, @PathVariable("id") Integer id) {
+    public String questionDelete(Principal principal, @PathVariable("id") Integer id, @RequestParam("category") String category) {
         Question question = this.questionService.getQuestion(id);
         SiteUser siteUser = getSiteUser(principal);
 
@@ -153,7 +168,7 @@ public class QuestionController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제권한이 없습니다.");
         }
         this.questionService.delete(question);
-        return "redirect:/";
+        return "redirect:/question/list?category=" + category;
     }
 
     @PreAuthorize("isAuthenticated()")

@@ -32,7 +32,7 @@
             <tr th:each="question, loop : ${paging}">
                 <td class="text-center" th:text="${paging.getTotalElements()  -paging.number*pageSize - loop.count +1 }"></td>
                 <td style="padding-left: 30px">
-                    <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
+                    <a th:href="@{|/question/detail/${question.id}?category=${category}|}" th:text="${question.subject}"></a>
                     <span class="text-danger small ms-2"
                           th:if="${#lists.size(question.answerList) > 0}"
                           th:text="${#lists.size(question.answerList)}">

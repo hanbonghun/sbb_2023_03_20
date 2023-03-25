@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class SocialController {
     @GetMapping("/login/oauth2/code/google")
     public String googleLogin(@RequestParam String code){
-        System.out.println("가나용");
-        System.out.println(code);
         return "";
     }
 }

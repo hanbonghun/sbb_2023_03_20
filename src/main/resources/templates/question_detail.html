@@ -14,6 +14,7 @@
           <div class="mb-2">
             <span th:if="${question.author != null}" th:text="${question.author.nickname}"></span>
           </div>
+          조회수 : <span th:text="${question.viewCount}"></span>
           <div th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></div>
         </div>
       </div>
@@ -27,7 +28,7 @@
            sec:authorize="isAuthenticated()"
            th:if="${siteUser!=null and siteUser.nickname == question.author.nickname}"
            th:text="수정"></a>
-        <a href="javascript:void(0);" th:data-uri="@{|/question/delete/${question.id}|}"
+        <a href="javascript:void(0);" th:data-uri="@{|/question/delete/${question.id}?category=${category}|}"
            class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
            th:if="${siteUser!=null and siteUser.nickname == question.author.nickname}"
            th:text="삭제"></a>
