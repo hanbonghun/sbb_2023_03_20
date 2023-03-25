@@ -20,10 +20,17 @@
       <input type="password" th:field="*{password2}" class="form-control">
     </div>
     <div class="mb-3">
+      <label for="nickname" class="form-label">닉네임</label>
+      <input type="text" th:field="*{nickname}" class="form-control">
+    </div>
+    <div class="mb-3">
       <label for="email" class="form-label">이메일</label>
       <input type="email" th:field="*{email}" class="form-control">
     </div>
     <button type="submit" class="btn btn-primary">회원가입</button>
   </form>
+  <a href="/oauth2/authorization/google">
+    <img src="/img/google-login-icon.png" alt="Google 로그인">
+  </a>
 </div>
 </html>

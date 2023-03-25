@@ -5,11 +5,13 @@ import com.mysite.sbb.answer.AnswerForm;
 import com.mysite.sbb.answer.AnswerService;
 import com.mysite.sbb.user.SiteUser;
 import com.mysite.sbb.user.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,18 +39,31 @@ public class QuestionController {
     private SiteUser getSiteUser(Principal principal) {
         SiteUser siteUser = null;
         if (principal instanceof OAuth2AuthenticationToken) {
-            OAuth2User oAuth2User = ((OAuth2AuthenticationToken) principal).getPrincipal();
-            String email = oAuth2User.getAttribute("email");
-            siteUser = this.userService.findByEmail(email);
-            siteUser.setGoogleId(email);
-        } else if(principal instanceof UsernamePasswordAuthenticationToken) {
+            OAuth2AuthenticationToken authenticationToken = (OAuth2AuthenticationToken) principal;
+            OAuth2User oAuth2User = authenticationToken.getPrincipal();
+            String provider = authenticationToken.getAuthorizedClientRegistrationId(); //google
+            String providerId = oAuth2User.getAttribute("sub"); //google_id (구글 로그인 시 사용자 별로 고유하게 식별되는 id)
+
+            if(provider.equals("google")){
+                siteUser = this.userService.findByGoogleId(providerId);
+            }
+        } else if(principal instanceof UsernamePasswordAuthenticationToken){
             siteUser = this.userService.getUser(principal.getName());
         }
         return siteUser;
     }
+    // 현재 세션으로 페이지에 접속한 적이 있는지를 확인
+    private boolean isHit(HttpServletRequest req, String viewKey){
+        return (String)req.getSession().getAttribute(viewKey) != null;
+    }
+
+    // 현재 세션으로 페이지에 처음 접속한다면 viewKey를 key로 추가
+    private void setHit(HttpServletRequest req, String viewKey){
+        req.getSession().setAttribute(viewKey,true);
+    }
 
     @GetMapping("/list")
-    public String list(Model model, @RequestParam(value="page", defaultValue="1") int page,    @RequestParam(value = "kw", defaultValue = "") String kw, @RequestParam(value="category", defaultValue = "qna") String category) {
+    public String list(Model model, @RequestParam(value="page", defaultValue="1") int page, @RequestParam(value = "kw", defaultValue = "") String kw, @RequestParam(value="category", defaultValue = "qna") String category) {
         int pageSize=10;
         Page<Question> paging = this.questionService.getList(page,pageSize,kw,category);
         model.addAttribute("paging", paging);
@@ -59,17 +74,24 @@ public class QuestionController {
     }
 
     @GetMapping(value = "/detail/{id}")
-    public String detail(Model model, @PathVariable("id") Integer id,  @RequestParam(value = "page", defaultValue = "1")int page, AnswerForm answerForm,Principal principal) {
+    public String detail(Model model,HttpServletRequest req, @PathVariable("id") Integer id, @RequestParam(value = "page", defaultValue = "1")int page, AnswerForm answerForm,Principal principal) {
         Question question = this.questionService.getQuestion(id);
+        // 한 페이지당 출력할 답변의 개수
         int pageSize = 5;
         Pageable pageable = PageRequest.of(page-1, pageSize, Sort.by(Sort.Direction.DESC, "createDate"));
         Page<Answer> paging = question.getAnswers(pageable);
         model.addAttribute("question", question);
         model.addAttribute("paging",paging);
         model.addAttribute("pageSize",pageSize);
+        // 현재 로그인된 사용자 정보 확인
         SiteUser siteUser = getSiteUser(principal);
-        if(siteUser!=null) System.out.println(siteUser.getUsername());
         model.addAttribute("siteUser",siteUser);
+
+        //조회수
+        String viewKey = "_q"+id;
+        if(!isHit(req,viewKey)){  //현재 세션으로 처음 방문
+
+        }
         return "question_detail";
     }
 
@@ -96,7 +118,7 @@ public class QuestionController {
     public String questionModify(QuestionForm questionForm, @PathVariable("id") Integer id, Principal principal) {
         Question question = this.questionService.getQuestion(id);
         SiteUser siteUser = getSiteUser(principal);
-        if(!question.getAuthor().getUsername().equals(siteUser.getUsername())) {
+        if(!question.getAuthor().getNickname().equals(siteUser.getNickname())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
         questionForm.setSubject(question.getSubject());
@@ -114,7 +136,7 @@ public class QuestionController {
         Question question = this.questionService.getQuestion(id);
         SiteUser siteUser = getSiteUser(principal);
 
-        if (!question.getAuthor().getUsername().equals(siteUser.getUsername())) {
+        if (!question.getAuthor().getNickname().equals(siteUser.getNickname())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
         this.questionService.modify(question, questionForm.getSubject(), questionForm.getContent());
@@ -127,7 +149,7 @@ public class QuestionController {
         Question question = this.questionService.getQuestion(id);
         SiteUser siteUser = getSiteUser(principal);
 
-        if (!question.getAuthor().getUsername().equals(siteUser.getUsername())) {
+        if (!question.getAuthor().getNickname().equals(siteUser.getNickname())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제권한이 없습니다.");
         }
         this.questionService.delete(question);

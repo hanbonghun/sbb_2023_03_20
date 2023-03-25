@@ -18,7 +18,6 @@ public class Oauth2UserSecurityService extends DefaultOAuth2UserService {
         String providerId = oAuth2User.getAttribute("sub");
         String username = provider+"_"+providerId;  			// 사용자가 입력한 적은 없지만 만들어준다
         String email = oAuth2User.getAttribute("email");
-
         System.out.println("provider : "+ provider);
         System.out.println("providerId : "+ providerId);
         System.out.println("username : "+ username);

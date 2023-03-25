@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -29,11 +30,15 @@ public class AnswerController {
     private SiteUser getSiteUser(Principal principal) {
         SiteUser siteUser = null;
         if (principal instanceof OAuth2AuthenticationToken) {
-            OAuth2User oAuth2User = ((OAuth2AuthenticationToken) principal).getPrincipal();
-            String email = oAuth2User.getAttribute("email");
-            siteUser = this.userService.findByEmail(email);
-            siteUser.setGoogleId(email);
-        } else if(principal instanceof UserDetails){
+            OAuth2AuthenticationToken authenticationToken = (OAuth2AuthenticationToken) principal;
+            OAuth2User oAuth2User = authenticationToken.getPrincipal();
+            String provider = authenticationToken.getAuthorizedClientRegistrationId(); //google
+            String providerId = oAuth2User.getAttribute("sub"); //google_id (구글 로그인 시 사용자 별로 고유하게 식별되는 id)
+
+            if(provider.equals("google")){
+                siteUser = this.userService.findByGoogleId(providerId);
+            }
+        } else if(principal instanceof UsernamePasswordAuthenticationToken){
             siteUser = this.userService.getUser(principal.getName());
         }
         return siteUser;
@@ -59,7 +64,7 @@ public class AnswerController {
     public String answerModify(AnswerForm answerForm, @PathVariable("id") Integer id, Principal principal) {
         Answer answer = this.answerService.getAnswer(id);
         SiteUser siteUser = getSiteUser(principal);
-        if (!answer.getAuthor().getUsername().equals(siteUser.getUsername())) {
+        if (!answer.getAuthor().getNickname().equals(siteUser.getNickname())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
         answerForm.setContent(answer.getContent());
@@ -76,7 +81,7 @@ public class AnswerController {
         Answer answer = this.answerService.getAnswer(id);
         SiteUser siteUser = getSiteUser(principal);
 
-        if (!answer.getAuthor().getUsername().equals(siteUser.getUsername())) {
+        if (!answer.getAuthor().getNickname().equals(siteUser.getNickname())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
         this.answerService.modify(answer, answerForm.getContent());
@@ -88,7 +93,7 @@ public class AnswerController {
     public String answerDelete(Principal principal, @PathVariable("id") Integer id) {
         Answer answer = this.answerService.getAnswer(id);
         SiteUser siteUser = getSiteUser(principal);
-        if (!answer.getAuthor().getUsername().equals(siteUser.getUsername())) {
+        if (!answer.getAuthor().getNickname().equals(siteUser.getNickname())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제권한이 없습니다.");
         }
         this.answerService.delete(answer);

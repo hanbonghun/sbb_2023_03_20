@@ -37,6 +37,7 @@ public class Question {
         return new PageImpl<>(answerList.subList(start, end), pageable, answerList.size());
     }
     private String category;
+    private long viewCount;
 
     @ManyToOne
     private SiteUser author;

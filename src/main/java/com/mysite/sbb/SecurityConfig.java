@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .userInfoEndpoint()
                 .userService(oauth2UserService)
                 .and()
-                .defaultSuccessUrl("/")
+                .defaultSuccessUrl("/user/signupNickname")
                 .and()
                 .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
