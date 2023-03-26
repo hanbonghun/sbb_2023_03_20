@@ -1,19 +1,20 @@
-<html layout:decorate="~{layout}">
+<html layout:decorate="~{board_layout}">
 <div layout:fragment="content" class="container my-3">
     <div class="row my-3">
-        <h1 th:switch="${category}">
+        <h2 th:switch="${category}">
             <p th:case="'qna'">질문 게시판</p>
             <p th:case="'free'">자유 게시판</p>
             <p th:case="'tips'">학습 노하우</p>
+            <p th:case="'study'">스터디 모집</p>
 <!--            <p th:case-default>기타게시판</p>-->
-        </h1>
+        </h2>
         <div class="col-6">
-            <a th:href="@{/question/create(category=${category})}" class="btn btn-primary">질문 등록하기</a>
+            <a th:href="@{/question/create(category=${category})}" class="btn btn-primary">글 쓰기</a>
         </div>
-        <div class="col-6">
-            <div class="input-group">
+        <div class="col-6 d-flex justify-content-end p-0">
+            <div class="input-group search-box">
                 <input type="text" id="search_kw" class="form-control" th:value="${kw}">
-                <button class="btn btn-outline-secondary" type="button" id="btn_search">찾기</button>
+                <button class="btn btn-outline-secondary" type="button" id="btn_search">검색</button>
             </div>
         </div>
     </div>

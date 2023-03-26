@@ -16,11 +16,13 @@
 <!-- 네비게이션바 -->
 <nav th:replace="~{navbar :: navbarFragment}"></nav>
 <!-- 사이드 바 -->
-<div class="content">
-    <nav th:replace="~{sidebar :: sidebarFragment }"></nav>
-    <!-- 기본 템플릿 안에 삽입될 내용 Start -->
-    <th:block layout:fragment="content"></th:block>
-<!-- 기본 템플릿 안에 삽입될 내용 End -->
+<div class="row">
+    <div class="content mt-3">
+        <nav th:replace="~{sidebar :: sidebarFragment }"></nav>
+        <!-- 기본 템플릿 안에 삽입될 내용 Start -->
+        <th:block layout:fragment="content" style="max-width:840px; padding:0px; margin:0px"></th:block>
+        <!-- 기본 템플릿 안에 삽입될 내용 End -->
+    </div>
 </div>
 <!-- Bootstrap JS -->
 <script th:src="@{/js/bootstrap.min.js}"></script>
@@ -29,5 +31,6 @@
 <!-- 자바스크립트 Start -->
 <th:block layout:fragment="script"></th:block>
 <!-- 자바스크립트 End -->
+
 </body>
 </html>

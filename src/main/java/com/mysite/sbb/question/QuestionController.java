@@ -38,22 +38,6 @@ public class QuestionController {
     private final UserService userService;
     private final AnswerService answerService;
 
-    private SiteUser getSiteUser(Principal principal) {
-        SiteUser siteUser = null;
-        if (principal instanceof OAuth2AuthenticationToken) {
-            OAuth2AuthenticationToken authenticationToken = (OAuth2AuthenticationToken) principal;
-            OAuth2User oAuth2User = authenticationToken.getPrincipal();
-            String provider = authenticationToken.getAuthorizedClientRegistrationId(); //google
-            String providerId = oAuth2User.getAttribute("sub"); //google_id (구글 로그인 시 사용자 별로 고유하게 식별되는 id)
-
-            if(provider.equals("google")){
-                siteUser = this.userService.findByGoogleId(providerId);
-            }
-        } else if(principal instanceof UsernamePasswordAuthenticationToken){
-            siteUser = this.userService.getUser(principal.getName());
-        }
-        return siteUser;
-    }
     // 쿠키에서 중복 방문 체크
     private boolean isHit(HttpServletRequest req, String viewKey) {
         // 쿠키 가져오기
@@ -72,7 +56,7 @@ public class QuestionController {
     public String list(Model model, Principal principal, @RequestParam(value="page", defaultValue="1") int page, @RequestParam(value = "kw", defaultValue = "") String kw, @RequestParam(value="category", defaultValue = "qna") String category) {
         int pageSize=10;
         Page<Question> paging = this.questionService.getList(page,pageSize,kw,category);
-        SiteUser siteUser = getSiteUser(principal);
+        SiteUser siteUser = this.userService.getSiteUser(principal);
         model.addAttribute("paging", paging);
         model.addAttribute("pageSize",pageSize);
         model.addAttribute("kw", kw);
@@ -89,7 +73,7 @@ public class QuestionController {
         Pageable pageable = PageRequest.of(page-1, pageSize, Sort.by(Sort.Direction.DESC, "createDate"));
         Page<Answer> paging = question.getAnswers(pageable);
         // 현재 로그인된 사용자 정보 확인
-        SiteUser siteUser = getSiteUser(principal);
+        SiteUser siteUser = this.userService.getSiteUser(principal);
         //조회수
         String viewKey = "_q" + id;
 
@@ -115,7 +99,7 @@ public class QuestionController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/create")
     public String questionCreate(Model model,QuestionForm questionForm, Principal principal, @RequestParam(value ="category") String category){
-        SiteUser siteUser = getSiteUser(principal);
+        SiteUser siteUser = this.userService.getSiteUser(principal);
         model.addAttribute("category", category);
         model.addAttribute("siteUser", siteUser);
         return "question_form";
@@ -127,7 +111,7 @@ public class QuestionController {
         if (bindingResult.hasErrors()) {
             return "question_form";
         }
-        SiteUser siteUser = getSiteUser(principal);
+        SiteUser siteUser = this.userService.getSiteUser(principal);
         Question q = this.questionService.create(questionForm.getSubject(), questionForm.getContent(),siteUser, category);
         return "redirect:/question/detail/"+ q.getId()+"?category="+category;
     }
@@ -136,7 +120,7 @@ public class QuestionController {
     @GetMapping("/modify/{id}")
     public String questionModify(QuestionForm questionForm, @PathVariable("id") Integer id, Principal principal) {
         Question question = this.questionService.getQuestion(id);
-        SiteUser siteUser = getSiteUser(principal);
+        SiteUser siteUser = this.userService.getSiteUser(principal);
         if(!question.getAuthor().getNickname().equals(siteUser.getNickname())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
@@ -153,7 +137,7 @@ public class QuestionController {
             return "question_form";
         }
         Question question = this.questionService.getQuestion(id);
-        SiteUser siteUser = getSiteUser(principal);
+        SiteUser siteUser = this.userService.getSiteUser(principal);
 
         if (!question.getAuthor().getNickname().equals(siteUser.getNickname())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
@@ -166,7 +150,7 @@ public class QuestionController {
     @GetMapping("/delete/{id}")
     public String questionDelete(Principal principal, @PathVariable("id") Integer id, @RequestParam("category") String category) {
         Question question = this.questionService.getQuestion(id);
-        SiteUser siteUser = getSiteUser(principal);
+        SiteUser siteUser = this.userService.getSiteUser(principal);
 
         if (!question.getAuthor().getNickname().equals(siteUser.getNickname())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제권한이 없습니다.");
@@ -179,7 +163,7 @@ public class QuestionController {
     @GetMapping("/vote/{id}")
     public String questionVote(Principal principal, @PathVariable("id") Integer id) {
         Question question = this.questionService.getQuestion(id);
-        SiteUser siteUser = getSiteUser(principal);
+        SiteUser siteUser = this.userService.getSiteUser(principal);
         this.questionService.vote(question, siteUser);
         return String.format("redirect:/question/detail/%s", id);
     }

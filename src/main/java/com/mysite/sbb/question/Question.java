@@ -29,7 +29,6 @@ public class Question {
     private LocalDateTime createDate;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
-    @OrderBy("createDate DESC")
     private List<Answer> answerList;
 
     public Page<Answer> getAnswers(Pageable pageable) {

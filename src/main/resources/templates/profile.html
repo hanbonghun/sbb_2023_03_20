@@ -1,5 +1,7 @@
-<html layout:decorate="~{layout}">
+<html layout:decorate="~{board_layout}">
 <div layout:fragment="content" class="container my-3">
+  <h2 th:text="${siteUser.nickname}"></h2>
+  <hr>
   <nav>
     <div class="nav nav-tabs" id="nav-tab" role="tablist">
       <button class="nav-link active" id="nav-base-tab" data-bs-toggle="tab" data-bs-target="#nav-base" type="button" role="tab" aria-controls="nav-base" aria-selected="true">기본 정보</button>
@@ -10,7 +12,7 @@
   </nav>
   <div class="tab-content" id="nav-tabContent">
     <div class="tab-pane fade show active" id="nav-base" role="tabpanel" aria-labelledby="nav-base-tab">
-      h1
+      <div th:include="fragments/profile_fragment::profile_fragment"></div>
     </div>
     <div class="tab-pane fade" id="nav-question" role="tabpanel" aria-labelledby="nav-question-tab">
       <div th:include="fragments/question_list_fragment :: questionList"></div>

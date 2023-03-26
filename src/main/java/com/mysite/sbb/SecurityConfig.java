@@ -1,6 +1,8 @@
 package com.mysite.sbb;
 
 import com.mysite.sbb.user.Oauth2UserSecurityService;
+import com.mysite.sbb.user.UserSecurityService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,9 +21,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 //인증이 필요한 함수임을 나타내기 위해
 @EnableMethodSecurity(prePostEnabled = true)
+@AllArgsConstructor
 public class SecurityConfig {
-    @Autowired
-    private Oauth2UserSecurityService oauth2UserService;
+    private final Oauth2UserSecurityService oauth2UserService;
     @Bean
         //인증되지 않은 모든 요청 허용
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

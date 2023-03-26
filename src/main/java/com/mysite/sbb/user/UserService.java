@@ -1,11 +1,20 @@
 package com.mysite.sbb.user;
 
 import com.mysite.sbb.DataNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import java.security.Principal;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -75,5 +84,23 @@ public class UserService {
     public boolean isNicknameExists(String nickname) {
         return this.userRepository.findByNickname(nickname).isPresent();
 
+    }
+
+    //principal객체에서 현재 로그인 한 사용자를 불러옴
+    public SiteUser getSiteUser(Principal principal) {
+        SiteUser siteUser = null;
+        if (principal instanceof OAuth2AuthenticationToken) {
+            OAuth2AuthenticationToken authenticationToken = (OAuth2AuthenticationToken) principal;
+            OAuth2User oAuth2User = authenticationToken.getPrincipal();
+            String provider = authenticationToken.getAuthorizedClientRegistrationId(); //google
+            String providerId = oAuth2User.getAttribute("sub"); //google_id (구글 로그인 시 사용자 별로 고유하게 식별되는 id)
+
+            if(provider.equals("google")){
+                siteUser = this.findByGoogleId(providerId);
+            }
+        } else if(principal instanceof UsernamePasswordAuthenticationToken){
+            siteUser = this.getUser(principal.getName());
+        }
+        return siteUser;
     }
 }
