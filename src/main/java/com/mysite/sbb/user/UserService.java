@@ -56,7 +56,6 @@ public class UserService {
 
     public SiteUser findByGoogleId(String google_id){
         Optional<SiteUser> siteUser = this.userRepository.findByGoogleId(google_id);
-        System.out.println("google_id = " + google_id);
         if(siteUser.isPresent()){
             SiteUser user = siteUser.get();
             return user;

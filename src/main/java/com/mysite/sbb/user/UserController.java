@@ -1,20 +1,26 @@
 package com.mysite.sbb.user;
 
+import com.mysite.sbb.answer.Answer;
+import com.mysite.sbb.answer.AnswerService;
+import com.mysite.sbb.question.Question;
+import com.mysite.sbb.answer.AnswerInfo;
+import com.mysite.sbb.question.QuestionService;
 import jakarta.validation.Valid;
 
+import org.springframework.data.domain.Page;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Controller
@@ -22,6 +28,24 @@ import java.security.Principal;
 public class UserController {
 
     private final UserService userService;
+    private final QuestionService questionService;
+    private final AnswerService answerService;
+    private SiteUser getSiteUser(Principal principal) {
+        SiteUser siteUser = null;
+        if (principal instanceof OAuth2AuthenticationToken) {
+            OAuth2AuthenticationToken authenticationToken = (OAuth2AuthenticationToken) principal;
+            OAuth2User oAuth2User = authenticationToken.getPrincipal();
+            String provider = authenticationToken.getAuthorizedClientRegistrationId(); //google
+            String providerId = oAuth2User.getAttribute("sub"); //google_id (구글 로그인 시 사용자 별로 고유하게 식별되는 id)
+
+            if(provider.equals("google")){
+                siteUser = this.userService.findByGoogleId(providerId);
+            }
+        } else if(principal instanceof UsernamePasswordAuthenticationToken){
+            siteUser = this.userService.getUser(principal.getName());
+        }
+        return siteUser;
+    }
 
     @GetMapping("/signup")
     public String signup(UserCreateForm userCreateForm) {
@@ -78,8 +102,6 @@ public class UserController {
         OAuth2User oAuth2User = authenticationToken.getPrincipal();
         String provider = authenticationToken.getAuthorizedClientRegistrationId(); //google
         String providerId = oAuth2User.getAttribute("sub"); //google_id (구글 로그인 시 사용자 별로 고유하게 식별되는 id)
-        System.out.println("providerName = " + provider);
-        System.out.println("providerId get = " + providerId);
         if(provider.equals("google")){
             siteUser = this.userService.findByGoogleId(providerId);
         }
@@ -99,6 +121,28 @@ public class UserController {
         String google_id = oAuth2User.getAttribute("sub");
         this.userService.createGoogleUser(email,userCreateForm.getNickname(), google_id);
         return "redirect:/";
+    }
+
+    @GetMapping("/profile")
+    public String profile(Principal principal,Model model,@RequestParam("nickname") String nickname, @RequestParam(value = "page", defaultValue = "1") int page){
+        SiteUser siteUser = getSiteUser(principal);
+        int pageSize=10;
+        Page<Question> questionPaging = this.questionService.getQuestionListByNickname(page, pageSize,siteUser.getNickname());
+        Page<Answer> answerPaging = this.answerService.getAnswerListByNickname(page, pageSize,nickname);
+        List<Answer> answerList = answerPaging.getContent();
+        List<AnswerInfo> questionAnswerInfoList = new ArrayList<>();
+
+        for (Answer answer : answerList) {
+            Question question = answer.getQuestion();
+            int answerIndex = question.getAnswerList().indexOf(answer) + 1;
+            questionAnswerInfoList.add(new AnswerInfo(question.getId(), question.getCategory(), answer.getId(), (int) Math.ceil(answerIndex*1.0/5),answer.getContent(), answer.getCreateDate(), question.getVoter().size()));
+        }
+        model.addAttribute("siteUser", siteUser);
+        model.addAttribute("questionPaging", questionPaging);
+        model.addAttribute("answerPaging", answerPaging);
+        model.addAttribute("questionAnswerInfoList", questionAnswerInfoList);
+        model.addAttribute("pageSize", pageSize);
+        return "profile";
     }
 
 }

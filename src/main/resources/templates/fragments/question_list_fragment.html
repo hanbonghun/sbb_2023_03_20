@@ -1,0 +1,79 @@
+<div th:fragment="questionList">
+    <div class="row my-3">
+        <table class="table">
+            <thead class="table-dark">
+            <tr class="text-center">
+                <th>번호</th>
+                <th>구분</th>
+                <th>추천</th>
+                <th style="width:50%">제목</th>
+                <th>작성일시</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="question, loop : ${questionPaging}">
+                <td class="text-center"
+                    th:text="${questionPaging.getTotalElements()  -questionPaging.number*pageSize - loop.count +1 }"></td>
+                <td class="text-center">
+                    <span th:switch="${question.category}">
+                    <span th:case="'qna'">질문게시판</span>
+                    <span th:case="'free'">자유게시판</span>
+                    <span th:case="'tips'">학습노하우</span>
+                    <span th:case="*">기타</span>
+                    </span>
+                </td>
+                <td class="text-center">
+                    <span th:text="${#sets.size(question.voter)}"></span>
+                </td>
+                <td>
+                    <a th:href="@{|/question/detail/${question.id}?category=${category}|}"
+                       th:text="${question.subject}"></a>
+                    <span class="text-danger small ms-2"
+                          th:if="${#lists.size(question.answerList) > 0}"
+                          th:text="${#lists.size(question.answerList)}">
+                    </span>
+                </td>
+                <td class="text-center" th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div th:fragment="answerList">
+    <div class="row my-3">
+        <table class="table">
+            <thead class="table-dark">
+            <tr class="text-center">
+                <th>번호</th>
+                <th>구분</th>
+                <th>추천</th>
+                <th style="width:50%">내용</th>
+                <th>작성일시</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="answerInfo, loop : ${questionAnswerInfoList}">
+                <td class="text-center"
+                    th:text="${answerPaging.getTotalElements()  -answerPaging.number*pageSize - loop.count +1 }"></td>
+                <td class="text-center">
+                    <span th:switch="${answerInfo.questionCategory}">
+                    <span th:case="'qna'">질문게시판</span>
+                    <span th:case="'free'">자유게시판</span>
+                    <span th:case="'tips'">학습노하우</span>
+                    <span th:case="*">기타</span>
+                    </span>
+                </td>
+                <td class="text-center">
+                    <span th:text="${answerInfo.voteCount}"></span>
+                </td>
+                <td>
+                    <a th:href="@{|/question/detail/${answerInfo.questionId}?page=${answerInfo.answerIndex}#answer_${answerInfo.answerId}|}" th:text="${answerInfo.answerContent}"></a>
+
+                </td>
+                <td class="text-center" th:text="${#temporals.format(answerInfo.answerLocalDateTime, 'yyyy-MM-dd HH:mm')}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

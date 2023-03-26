@@ -69,13 +69,15 @@ public class QuestionController {
     }
 
     @GetMapping("/list")
-    public String list(Model model, @RequestParam(value="page", defaultValue="1") int page, @RequestParam(value = "kw", defaultValue = "") String kw, @RequestParam(value="category", defaultValue = "qna") String category) {
+    public String list(Model model, Principal principal, @RequestParam(value="page", defaultValue="1") int page, @RequestParam(value = "kw", defaultValue = "") String kw, @RequestParam(value="category", defaultValue = "qna") String category) {
         int pageSize=10;
         Page<Question> paging = this.questionService.getList(page,pageSize,kw,category);
+        SiteUser siteUser = getSiteUser(principal);
         model.addAttribute("paging", paging);
         model.addAttribute("pageSize",pageSize);
         model.addAttribute("kw", kw);
         model.addAttribute("category",category);
+        model.addAttribute("siteUser", siteUser);
         return "question_list";
     }
 
@@ -112,8 +114,10 @@ public class QuestionController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/create")
-    public String questionCreate(Model model,QuestionForm questionForm, @RequestParam(value ="category") String category){
+    public String questionCreate(Model model,QuestionForm questionForm, Principal principal, @RequestParam(value ="category") String category){
+        SiteUser siteUser = getSiteUser(principal);
         model.addAttribute("category", category);
+        model.addAttribute("siteUser", siteUser);
         return "question_form";
     }
 

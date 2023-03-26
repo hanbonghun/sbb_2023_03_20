@@ -2,7 +2,6 @@ package com.mysite.sbb.question;
 
 import com.mysite.sbb.DataNotFoundException;
 import com.mysite.sbb.user.SiteUser;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,7 +10,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import com.mysite.sbb.answer.Answer;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -33,6 +31,11 @@ public class QuestionService {
         Pageable pageable = PageRequest.of(page-1,pageSize,Sort.by("createDate").descending());
         Specification<Question> spec = search(kw,category);
         return this.questionRepository.findAll(spec,pageable);
+    }
+
+    public Page<Question> getQuestionListByNickname(int page, int pageSize, String nickname) {
+        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("createDate").descending());
+        return this.questionRepository.findByAuthorNickname(nickname,pageable);
     }
 
     public Question getQuestion(Integer id) {

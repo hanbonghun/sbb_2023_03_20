@@ -5,14 +5,17 @@
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <div class="collapse navbar-collapse pl" id="navbarSupportedContent">
+      <ul class="navbar-nav" style="margin-left:auto">
         <li class="nav-item">
           <a class="nav-link" sec:authorize="isAnonymous()" th:href="@{/user/login}">로그인</a>
           <a class="nav-link" sec:authorize="isAuthenticated()" th:href="@{/user/logout}">로그아웃</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" th:href ="@{/user/signup}">회원가입</a>
+          <a class="nav-link" sec:authorize="isAnonymous()" th:href ="@{/user/signup}">회원가입</a>
+        </li>
+        <li class="nav-item ml-auto">
+          <a class="nav-link" sec:authorize="isAuthenticated()" th:href="@{/user/profile(nickname=${siteUser.nickname})}" th:text="${siteUser.nickname}"></a>
         </li>
       </ul>
     </div>
