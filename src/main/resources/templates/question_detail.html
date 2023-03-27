@@ -33,6 +33,15 @@
            th:if="${siteUser!=null and siteUser.nickname == question.author.nickname}"
            th:text="삭제"></a>
       </div>
+      <div class="comment-list">
+<!--        여기 댓글-->
+      </div>
+      <span class="question-comment-trigger">댓글 쓰기</span>
+      <form class="question-comment-form" th:action="@{/comment/create/question}">
+        <textarea class="form-control" placeholder="댓글을 입력하세요" rows="3"></textarea>
+        <button type="submit" class="btn btn-primary mt-2">등록</button>
+        <input type="hidden" name="question_id" th:value="${question.id}">
+      </form>
     </div>
   </div>
   <!-- 답변의 갯수 표시 -->
@@ -75,6 +84,15 @@
            th:if="${siteUser!=null and siteUser.nickname == answer.author.nickname}"
            th:text="삭제"></a>
       </div>
+      <div class="comment-list">
+        <!--        여기 댓글-->
+      </div>
+      <span class="answer-comment-trigger" th:data-answer-id="${answer.id}">댓글 쓰기</span>
+      <form class="answer-comment-form" th:data-answer-id="${answer.id}" th:action="@{/comment/create/answer}">
+        <textarea class="form-control" placeholder="댓글을 입력하세요" rows="3"></textarea>
+        <button type="submit" class="btn btn-primary mt-2">등록</button>
+        <input type="hidden" name="answer_id" th:value="${answer.id}">
+      </form>
     </div>
   </div>
   <!-- 답변 반복 끝  -->
@@ -109,6 +127,38 @@
 
 </div>
 <script layout:fragment="script" type='text/javascript'>
+<!--  질문에 대한 댓글 이벤트 처리 -->
+  const commentTrigger = document.querySelector('.question-comment-trigger');
+  const commentForm = document.querySelector('.question-comment-form');
+
+  commentTrigger.addEventListener('click', () => {
+    if (commentForm.style.display === 'none') {
+      commentForm.style.display = 'block';
+      commentTrigger.textContent="닫기"
+    } else {
+      commentForm.style.display = 'none';
+      commentTrigger.textContent="댓글 쓰기"
+    }
+  });
+
+// 답변에 대한 댓글 쓰기 이벤트 처리
+document.querySelectorAll('.answer-comment-trigger').forEach(trigger => {
+  trigger.addEventListener('click', () => {
+    const answerId = trigger.dataset.answerId;
+    const form = document.querySelector(`.answer-comment-form[data-answer-id="${answerId}"]`);
+
+    if (form.style.display === 'none') {
+      form.style.display = 'block';
+      trigger.textContent = "닫기";
+    } else {
+      form.style.display = 'none';
+      trigger.textContent = "댓글 쓰기";
+    }
+  });
+});
+  window.addEventListener('beforeunload', () => {
+    commentForm.style.display = 'none';
+  });
   const delete_elements = document.getElementsByClassName("delete");
   Array.from(delete_elements).forEach(function(element) {
     element.addEventListener('click', function() {

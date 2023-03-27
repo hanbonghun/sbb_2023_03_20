@@ -6,12 +6,13 @@ import com.mysite.sbb.user.SiteUser;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     @Column(columnDefinition = "TEXT")
     private String content;
     private LocalDateTime createDate;
@@ -23,6 +24,8 @@ public class Comment {
 
     @ManyToOne
     private SiteUser author;
+    @ManyToMany
+    private Set<SiteUser> voter;
     private LocalDateTime modifyDate;
 
 }

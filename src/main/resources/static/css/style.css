@@ -73,6 +73,15 @@ a:hover{
     justify-content: space-between;
     flex-wrap: wrap; /* 너비가 작아지면 아래로 내려가며 배열 */
 }
+
+.question-comment-form {
+    display: none;
+}
+
+.answer-comment-form{
+    display: none;
+}
+
 /* 화면 크기가 작아질 때 */
 @media (max-width: 768px) {
     .content .home-board{
