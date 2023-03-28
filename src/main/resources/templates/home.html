@@ -1,17 +1,18 @@
 <html layout:decorate="~{board_layout}">
-<div layout:fragment="content" class="my-3" style="max-width: 840px">
-    <div class="home-board">
-        <!-- 게시판 1 출력 -->
-        <div th:replace="home_board_template(name='자유 게시판', questions=${freePaging}, category='free')"></div>
-
-        <!-- 게시판 2 출력 -->
-        <div th:replace="home_board_template(name='질문 게시판', questions=${qnaPaging}, category='qna')"></div>
-
-        <!-- 게시판 3 출력 -->
-        <div th:replace="home_board_template(name='학습 노하우', questions=${tipsPaging}, category='tips')"></div>
-
-        <!-- 게시판 4 출력 -->
-        <div th:replace="home_board_template(name='스터디 모집', questions=${studyPaging}, category='study')"></div>
+<div layout:fragment="content" class="container">
+    <div class="home-board d-flex justify-content-between" style="width:100%">
+        <div>
+            <!-- 게시판 1 출력 -->
+            <div th:replace="home_board_template(name='자유 게시판', questions=${freePaging}, category='free')"></div>
+            <!-- 게시판 2 출력 -->
+            <div th:replace="home_board_template(name='질문 게시판', questions=${qnaPaging}, category='qna')"></div>
+        </div>
+        <div>
+            <!-- 게시판 3 출력 -->
+            <div th:replace="home_board_template(name='학습 노하우', questions=${tipsPaging}, category='tips')"></div>
+            <!-- 게시판 4 출력 -->
+            <div th:replace="home_board_template(name='스터디 모집', questions=${studyPaging}, category='study')"></div>
+        </div>
     </div>
 </div>
 </html>

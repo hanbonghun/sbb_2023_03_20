@@ -41,35 +41,35 @@ public class UserController {
 
     @GetMapping("/signup")
     public String signup(UserCreateForm userCreateForm) {
-        return "signup_form";
+        return "signup_demo";
     }
 
     @PostMapping("/signup")
     public String signup(@Valid UserCreateForm userCreateForm, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "signup_form";
+            return "signup_demo";
         }
 
         if (!userCreateForm.getPassword1().equals(userCreateForm.getPassword2())) {
             bindingResult.rejectValue("password2", "passwordInCorrect",
                     "2개의 패스워드가 일치하지 않습니다.");
-            return "signup_form";
+            return "signup_demo";
         }
 
         if(this.userService.isUsernameExists(userCreateForm.getUsername())) {
             bindingResult.rejectValue("username", "duplicateUsername",
                     "이미 존재하는 ID입니다");
-            return "signup_form";
+            return "signup_demo";
         }
         if(this.userService.isEmailExists(userCreateForm.getEmail())) {
             bindingResult.rejectValue("email", "duplicateEmail",
                     "이미 존재하는 메일입니다");
-            return "signup_form";
+            return "signup_demo";
         }
         if(this.userService.isNicknameExists(userCreateForm.getNickname())) {
             bindingResult.rejectValue("nickname", "duplicateNickname",
                     "이미 존재하는 닉네임입니다");
-            return "signup_form";
+            return "signup_demo";
         }
         userService.createUser(userCreateForm.getUsername(),
                 userCreateForm.getEmail(), userCreateForm.getNickname(), userCreateForm.getPassword1());
@@ -85,7 +85,7 @@ public class UserController {
 
     @GetMapping("/login")
     public String login() {
-        return "login_form";
+        return "loginDemo";
     }
 
     @GetMapping("/signupNickname")
@@ -120,7 +120,7 @@ public class UserController {
     @GetMapping("/profile")
     public String profile(Principal principal,Model model,@RequestParam("nickname") String nickname, @RequestParam(value = "page", defaultValue = "1") int page){
         SiteUser siteUser = this.userService.getSiteUser(principal);
-        int pageSize=10;
+        int pageSize=15;
         Page<Question> questionPaging = this.questionService.getQuestionListByNickname(page, pageSize,siteUser.getNickname());
         Page<Answer> answerPaging = this.answerService.getAnswerListByNickname(page, pageSize,nickname);
         List<Answer> answerList = answerPaging.getContent();
@@ -129,7 +129,8 @@ public class UserController {
         for (Answer answer : answerList) {
             Question question = answer.getQuestion();
             int answerIndex = question.getAnswerList().indexOf(answer) + 1;
-            questionAnswerInfoList.add(new AnswerInfo(question.getId(), question.getCategory(), answer.getId(), (int) Math.ceil(answerIndex*1.0/5),answer.getContent(), answer.getCreateDate(), answer.getVoter().size()));
+            int answerPage = (int) Math.ceil(answerIndex*1.0/5);
+            questionAnswerInfoList.add(new AnswerInfo(question.getId(), question.getCategory(), answer.getId(), answerPage,answer.getContent(), answer.getCreateDate(), answer.getVoter().size()));
         }
         model.addAttribute("siteUser", siteUser);
         model.addAttribute("questionPaging", questionPaging);

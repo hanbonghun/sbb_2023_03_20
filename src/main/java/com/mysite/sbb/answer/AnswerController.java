@@ -39,9 +39,9 @@ public class AnswerController {
         Answer answer = this.answerService.create(question,
                 answerForm.getContent(), siteUser);
         int answerIndex = question.getAnswerList().size()+ 1;
-
+        int answerPage = (int) Math.ceil(answerIndex*1.0/5);
         return String.format("redirect:/question/detail/%s?page=%s#answer_%s",
-                answer.getQuestion().getId(),(int) Math.ceil(answerIndex*1.0/5), answer.getId());
+                answer.getQuestion().getId(),answerPage, answer.getId());
     }
 
     @PreAuthorize("isAuthenticated()")

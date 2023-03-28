@@ -1,4 +1,15 @@
-<nav id="sidebarMenu" th:fragment="sidebarFragment" class="sidebar">
+<nav th:fragment="leftSidebarFragment" class="sidebar my-3 flex-shrink-0">
+    <div class="position-sticky">
+        <ul>
+            <li><a href="/question/list?category=qna">질문 게시판</a></li>
+            <li><a href="/question/list?category=free">자유 게시판</a></li>
+            <li><a href="/question/list?category=tips">학습 노하우</a></li>
+            <li><a href="/question/list?category=study">스터디 모집</a></li>
+        </ul>
+    </div>
+</nav>
+
+<nav th:fragment="rightSidebarFragment" class="sidebar my-3 flex-shrink-0">
     <div class="position-sticky">
         <ul>
             <li><a href="/question/list?category=qna">질문 게시판</a></li>

@@ -23,7 +23,7 @@ public class MainController {
 
     @GetMapping("/")
     public String root(Model model, Principal principal){
-        int pageSize=10;
+        int pageSize=5;
         Page<Question> qnaPaging = this.questionService.getList(1,pageSize,"","qna");
         Page<Question> freePaging = this.questionService.getList(1,pageSize,"","free");
         Page<Question> tipsPaging = this.questionService.getList(1,pageSize,"","tips");

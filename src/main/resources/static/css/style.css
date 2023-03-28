@@ -1,30 +1,79 @@
+@charset "UTF-8";
 
-html{
-    height:100%;
+* {
+    margin: 0px;
+    padding: 0px;
 }
 
-a{
+ul, ol {
+    list-style: none;
+}
+
+a {
+    text-decoration: none
+}
+
+@font-face {
+    font-family: 'GmarketSansMedium';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+html {
+    height: 100%;
+}
+
+html > body {
+    font-family: "GmarketSansMedium";
+    text-underline-position: under;
+}
+
+ul {
+    padding: 0px;
+    margin: 0px;
+}
+
+ul > li {
+    list-style: none;
+}
+
+.container {
+    padding: 0;
+    margin: 0;
+    margin-top: 20px;
+    max-width: 840px;
+}
+
+a {
     text-decoration: none;
-    color:black;
+    color: black;
 }
-a:hover{
+
+a:hover {
     text-decoration: underline;
-    color:#3b82f6;
+    color: #3b82f6;
 }
-.row{
-    display:flex;
-    width:100%;
+
+.content {
+    max-width: 1280px;
+    display: flex;
     justify-content: center;
 }
-.content{
-    display:flex;
-    max-width: 1140px;
-    justify-content: center;
+
+.home-board .board-group {
+    height: 450px;
+    margin-bottom: 50px;
 }
+
+.home-board > div {
+    width: calc(50% - 20px);
+}
+
+
 .sidebar {
-    width: 200px;
-    padding: 20px 0;
-    display:flex;
+    width: 180px;
+    display: flex;
     flex-direction: row;
     justify-content: center;
 }
@@ -35,8 +84,8 @@ a:hover{
     padding: 0;
 }
 
-.sidebar ul li{
-    padding:10px;
+.sidebar ul li {
+    padding: 10px;
     border-bottom: 1px solid gray;
 }
 
@@ -63,28 +112,68 @@ a:hover{
     color: #007bff;
 }
 
-.search-box{
+.search-box {
     border-radius: 43px;
     width: 200px;
 }
 
-.home-board {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap; /* 너비가 작아지면 아래로 내려가며 배열 */
+.comment {
+    font-size: 13px;
+    border-top: solid 1px #eee;
+    border-bottom: solid 1px #eee;
+
 }
 
-.question-comment-form {
-    display: none;
+.comment-textarea {
+    font-size: 13px;
 }
 
-.answer-comment-form{
-    display: none;
+.comment .comment-author {
+    font-weight: bold;
 }
 
-/* 화면 크기가 작아질 때 */
-@media (max-width: 768px) {
-    .content .home-board{
+.comment {
+    padding-top: 5px;
+}
+
+.comment .date {
+    float: right;
+    color: #cccccc;
+}
+
+.comment .comment-vote {
+    float: right;
+    color: #cccccc;
+}
+
+.comment .up {
+    float: right;
+    color: #cccccc;
+}
+
+@media screen and (max-width: 1023px) {
+    .sidebar {
+        display: none;
+    }
+
+    .home-board {
+        padding: 1rem;
+    }
+}
+
+@media screen and (max-width: 840px) {
+    .container {
+        margin:10px;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .home-board {
         flex-direction: column;
+        padding: 1rem;
+    }
+
+    .home-board > div {
+        width: 100%;
     }
 }

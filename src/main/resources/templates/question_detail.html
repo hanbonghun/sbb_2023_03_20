@@ -1,179 +1,214 @@
 <html layout:decorate="~{board_layout}">
-<div layout:fragment="content" class="container my-3">
-  <!-- 질문 -->
-  <h2 class="border-bottom py-2" th:text="${question.subject}"></h2>
-  <div class="card my-3">
-    <div class="card-body">
-      <div class="card-text" th:utext="${@commonUtil.markdown(question.content)}"></div>
-      <div class="d-flex justify-content-end">
-        <div th:if="${question.modifyDate != null}" class="badge bg-light text-dark p-2 text-start mx-3">
-          <div class="mb-2">modified at</div>
-          <div th:text="${#temporals.format(question.modifyDate, 'yyyy-MM-dd HH:mm')}"></div>
+<div layout:fragment="content" class="container">
+    <!-- 질문 -->
+    <h2 class="border-bottom py-2" th:text="${question.subject}"></h2>
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="card-text" th:utext="${@commonUtil.markdown(question.content)}"></div>
+            <div class="d-flex justify-content-end">
+                <div th:if="${question.modifyDate != null}" class="badge bg-light text-dark p-2 text-start mx-3">
+                    <div class="mb-2">modified at</div>
+                    <div th:text="${#temporals.format(question.modifyDate, 'yyyy-MM-dd HH:mm')}"></div>
+                </div>
+                <div class="badge bg-light text-dark p-2 text-start">
+                    <div class="mb-2">
+                        <span th:if="${question.author != null}" th:text="${question.author.nickname}"></span>
+                    </div>
+                    조회수 : <span th:text="${question.viewCount}"></span>
+                    <div th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+                </div>
+            </div>
+            <div class="my-3">
+                <a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
+                   th:data-uri="@{|/question/vote/${question.id}|}">
+                    추천
+                    <span class="badge rounded-pill bg-success" th:text="${#lists.size(question.voter)}"></span>
+                </a>
+                <a th:href="@{|/question/modify/${question.id}|}" class="btn btn-sm btn-outline-secondary"
+                   sec:authorize="isAuthenticated()"
+                   th:if="${siteUser!=null and siteUser.nickname == question.author.nickname}"
+                   th:text="수정"></a>
+                <a href="javascript:void(0);" th:data-uri="@{|/question/delete/${question.id}?category=${category}|}"
+                   class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
+                   th:if="${siteUser!=null and siteUser.nickname == question.author.nickname}"
+                   th:text="삭제"></a>
+            </div>
+            <ul class="comment-list">
+                <!--        여기 댓글-->
+                <a href="#question-comment-start"></a>
+                <ul class="comment" th:each="comment : ${question.commentList}">
+                    <div>
+                        <a th:href="@{|/user/profile?nickname=${comment.author.nickname}|}" class="comment-author" th:text="${comment.author.nickname}">작성자</a>
+                        <span style="color:#cccccc" th:text="${#lists.size(comment.voter) > 0 ? '+' + #lists.size(comment.voter) : ''}"></span>
+                        <span class="date" style="text-align:right; margin-bottom:3px" th:text="${#temporals.format(comment.createDate, 'yyyy-MM-dd HH:mm')}">작성일</span>
+                    </div>
+                    <p class="comment-content" th:text="${comment.content}">내용</p>
+                    <div style="text-align: right">
+                       <a th:href="@{|/comment/vote/question/${comment.id}|}" style="color:#007bff; text-decoration: underline">추천</a>
+<!--                       <a sec:authorize="isAuthenticated()"-->
+<!--                          th:if="${siteUser!=null and siteUser.nickname == comment.author.nickname}"-->
+<!--                          th:text="삭제"-->
+<!--                          th:href="@{|/comment/vote/question/${comment.id}|}" style="color:#007bff; text-decoration: underline">-->
+<!--                       </a>-->
+                    </div>
+                </ul>
+                <a href="#answer_${comment.id}"></a>
+            </ul>
+            <a class="question-comment-trigger d-block pt-1" style="text-decoration: underline">댓글 쓰기</a>
+            <form method="post" style="display: none" class="question-comment-form" th:action="@{/comment/create/question}">
+                <textarea required class="form-control comment-textarea" name="content" placeholder="댓글을 입력하세요"
+                          rows="3"></textarea>
+                <button type="submit" class="btn btn-primary mt-2">등록</button>
+                <input type="hidden" name="question_id" th:value="${question.id}">
+            </form>
         </div>
-        <div class="badge bg-light text-dark p-2 text-start">
-          <div class="mb-2">
-            <span th:if="${question.author != null}" th:text="${question.author.nickname}"></span>
-          </div>
-          조회수 : <span th:text="${question.viewCount}"></span>
-          <div th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></div>
-        </div>
-      </div>
-      <div class="my-3">
-        <a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
-           th:data-uri="@{|/question/vote/${question.id}|}">
-          추천
-          <span class="badge rounded-pill bg-success" th:text="${#lists.size(question.voter)}"></span>
-        </a>
-        <a th:href="@{|/question/modify/${question.id}|}" class="btn btn-sm btn-outline-secondary"
-           sec:authorize="isAuthenticated()"
-           th:if="${siteUser!=null and siteUser.nickname == question.author.nickname}"
-           th:text="수정"></a>
-        <a href="javascript:void(0);" th:data-uri="@{|/question/delete/${question.id}?category=${category}|}"
-           class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
-           th:if="${siteUser!=null and siteUser.nickname == question.author.nickname}"
-           th:text="삭제"></a>
-      </div>
-      <div class="comment-list">
-<!--        여기 댓글-->
-      </div>
-      <span class="question-comment-trigger">댓글 쓰기</span>
-      <form class="question-comment-form" th:action="@{/comment/create/question}">
-        <textarea class="form-control" placeholder="댓글을 입력하세요" rows="3"></textarea>
-        <button type="submit" class="btn btn-primary mt-2">등록</button>
-        <input type="hidden" name="question_id" th:value="${question.id}">
-      </form>
     </div>
-  </div>
-  <!-- 답변의 갯수 표시 -->
-  <h5 class="border-bottom my-3 py-2"
-      th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다.|"></h5>
-  <a th:id="first"></a>
+    <!-- 답변의 갯수 표시 -->
+    <h5 class="border-bottom my-3 py-2"
+        th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다.|"></h5>
+    <a th:id="first"></a>
 
-  <!-- 답변 반복 시작 -->
-  <div class="card my-3" th:each="answer : ${paging.content}">
-    <a th:id="start"></a>
-    <a th:id="|answer_${answer.id}|"></a>
+    <!-- 답변 반복 시작 -->
+    <div class="card my-3" th:each="answer : ${paging.content}">
+        <a th:id="start"></a>
+        <a th:id="|answer_${answer.id}|"></a>
 
-    <div class="card-body">
-      <div class="card-text" th:utext="${@commonUtil.markdown(answer.content)}"></div>
-      <div class="d-flex justify-content-end">
-        <div th:if="${answer.modifyDate != null}" class="badge bg-light text-dark p-2 text-start mx-3">
-          <div class="mb-2">modified at</div>
-          <div th:text="${#temporals.format(answer.modifyDate, 'yyyy-MM-dd HH:mm')}"></div>
+        <div class="card-body">
+            <div class="card-text" th:utext="${@commonUtil.markdown(answer.content)}"></div>
+            <div class="d-flex justify-content-end">
+                <div th:if="${answer.modifyDate != null}" class="badge bg-light text-dark p-2 text-start mx-3">
+                    <div class="mb-2">modified at</div>
+                    <div th:text="${#temporals.format(answer.modifyDate, 'yyyy-MM-dd HH:mm')}"></div>
+                </div>
+                <div class="badge bg-light text-dark p-2 text-start">
+                    <div class="mb-2">
+                        <span th:if="${answer.author != null}" th:text="${answer.author.nickname}"></span>
+                    </div>
+                    <div th:text="${#temporals.format(answer.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+                </div>
+            </div>
+            <div class="my-3">
+                <a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
+                   th:data-uri="@{|/answer/vote/${answer.id}|}">
+                    추천
+                    <span class="badge rounded-pill bg-success" th:text="${#lists.size(answer.voter)}"></span>
+                </a>
+                <a th:href="@{|/answer/modify/${answer.id}|}" class="btn btn-sm btn-outline-secondary"
+                   sec:authorize="isAuthenticated()"
+                   th:if="${siteUser!=null and siteUser.nickname == answer.author.nickname}"
+                   th:text="수정">
+                </a>
+                <a href="javascript:void(0);" th:data-uri="@{|/answer/delete/${answer.id}|}"
+                   class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
+                   th:if="${siteUser!=null and siteUser.nickname == answer.author.nickname}"
+                   th:text="삭제"></a>
+            </div>
+            <a th:id="|answer-comment-start_${answer.id}|"></a>
+            <ul class="comment-list">
+                <!--        여기 댓글-->
+                <ul class="comment" th:each="comment : ${answer.commentList}">
+                    <div>
+                        <a th:href="@{|/user/profile?nickname=${comment.author.nickname}|}" class="comment-author" th:text="${comment.author.nickname}">작성자</a>
+                        <span style="color:#cccccc" th:text="${#lists.size(comment.voter) > 0 ? '+' + #lists.size(comment.voter) : ''}"></span>
+                        <span class="date" th:text="${#temporals.format(comment.createDate, 'yyyy-MM-dd HH:mm')}">작성일</span>
+                    </div>
+                    <p class="comment-content" th:text="${comment.content}">내용</p>
+                    <div style="text-align: right; margin-bottom:3px">
+                        <a th:href="@{|/comment/vote/answer/${comment.id}|}" style="color:#007bff; text-decoration: underline">추천</a>
+                    </div>
+                </ul>
+                <a href="#answer_${comment.id}"></a>
+            </ul>
+            <a class="answer-comment-trigger d-block pt-1" th:data-answer-id="${answer.id}" style="text-decoration: underline; margin-top:3px">댓글 쓰기</a>
+            <form method="post" class="answer-comment-form" style="display:none" th:data-answer-id="${answer.id}" th:action="@{/comment/create/answer}">
+                <textarea required class="form-control comment-textarea" name="content" placeholder="댓글을 입력하세요"
+                          rows="3"></textarea>
+                <button type="submit" class="btn btn-primary mt-2">등록</button>
+                <input type="hidden" name="answer_id" th:value="${answer.id}">
+            </form>
         </div>
-        <div class="badge bg-light text-dark p-2 text-start">
-          <div class="mb-2">
-            <span th:if="${answer.author != null}" th:text="${answer.author.nickname}"></span>
-          </div>
-          <div th:text="${#temporals.format(answer.createDate, 'yyyy-MM-dd HH:mm')}"></div>
-        </div>
-      </div>
-      <div class="my-3">
-        <a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
-           th:data-uri="@{|/answer/vote/${answer.id}|}">
-          추천
-          <span class="badge rounded-pill bg-success" th:text="${#lists.size(answer.voter)}"></span>
-        </a>
-        <a th:href="@{|/answer/modify/${answer.id}|}" class="btn btn-sm btn-outline-secondary"
-           sec:authorize="isAuthenticated()"
-           th:if="${siteUser!=null and siteUser.nickname == answer.author.nickname}"
-           th:text="수정">
-        </a>
-        <a href="javascript:void(0);" th:data-uri="@{|/answer/delete/${answer.id}|}"
-           class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
-           th:if="${siteUser!=null and siteUser.nickname == answer.author.nickname}"
-           th:text="삭제"></a>
-      </div>
-      <div class="comment-list">
-        <!--        여기 댓글-->
-      </div>
-      <span class="answer-comment-trigger" th:data-answer-id="${answer.id}">댓글 쓰기</span>
-      <form class="answer-comment-form" th:data-answer-id="${answer.id}" th:action="@{/comment/create/answer}">
-        <textarea class="form-control" placeholder="댓글을 입력하세요" rows="3"></textarea>
-        <button type="submit" class="btn btn-primary mt-2">등록</button>
-        <input type="hidden" name="answer_id" th:value="${answer.id}">
-      </form>
     </div>
-  </div>
-  <!-- 답변 반복 끝  -->
-  <div th:if="${!paging.isEmpty()}">
-    <ul class="pagination justify-content-center">
-      <li class="page-item" th:if="${paging.hasPrevious}" >
-        <a class="page-link" th:href="@{|?page=${paging.number}#start|}">
-          <span>이전</span>
-        </a>
-      </li>
-      <li th:each="page: ${#numbers.sequence(paging.number/pageSize*pageSize, (paging.number/pageSize+1)*pageSize-1)}"
-          th:classappend="${page == paging.number} ? 'active'"
-          th:if="${page<paging.totalPages}"
-          class="page-item"
-      >
-        <a th:text="${page+1}" class="page-link" th:href="@{|?page=${page+1}#start|}"></a>
-      </li>
-      <li class="page-item" th:if="${paging.hasNext()}" >
-        <a class="page-link" th:href="@{|?page=${paging.number+2}#start|}">
-          <span>다음</span>
-        </a>
-      </li>
-    </ul>
-  </div>
-  <!-- 답변 작성 -->
-  <form th:action="@{|/answer/create/${question.id}|}" th:object="${answerForm}" method="post" class="my-3">
-    <div th:replace="~{form_errors :: formErrorsFragment}"></div>
-    <textarea sec:authorize="isAnonymous()" disabled th:field="*{content}" class="form-control" rows="10"></textarea>
-    <textarea sec:authorize="isAuthenticated()" th:field="*{content}" class="form-control" rows="10"></textarea>
-    <input type="submit" value="답변등록" class="btn btn-primary my-2">
-  </form>
+    <!-- 답변 반복 끝  -->
+    <div th:if="${!paging.isEmpty()}">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:if="${paging.hasPrevious}">
+                <a class="page-link" th:href="@{|?page=${paging.number}#start|}">
+                    <span>이전</span>
+                </a>
+            </li>
+            <li th:each="page: ${#numbers.sequence(paging.number/pageSize*pageSize, (paging.number/pageSize+1)*pageSize-1)}"
+                th:classappend="${page == paging.number} ? 'active'"
+                th:if="${page<paging.totalPages}"
+                class="page-item"
+            >
+                <a th:text="${page+1}" class="page-link" th:href="@{|?page=${page+1}#start|}"></a>
+            </li>
+            <li class="page-item" th:if="${paging.hasNext()}">
+                <a class="page-link" th:href="@{|?page=${paging.number+2}#start|}">
+                    <span>다음</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- 답변 작성 -->
+    <form th:action="@{|/answer/create/${question.id}|}" th:object="${answerForm}" method="post" class="my-3">
+        <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+        <textarea sec:authorize="isAnonymous()" disabled th:field="*{content}" class="form-control"
+                  rows="10"></textarea>
+        <textarea required sec:authorize="isAuthenticated()" th:field="*{content}" class="form-control" rows="10"></textarea>
+        <input type="submit" value="답변등록" class="btn btn-primary my-2">
+    </form>
 
 </div>
 <script layout:fragment="script" type='text/javascript'>
-<!--  질문에 대한 댓글 이벤트 처리 -->
-  const commentTrigger = document.querySelector('.question-comment-trigger');
-  const commentForm = document.querySelector('.question-comment-form');
+    <!--  질문에 대한 댓글 이벤트 처리 -->
+    const commentTrigger = document.querySelector('.question-comment-trigger');
+    const commentForm = document.querySelector('.question-comment-form');
 
-  commentTrigger.addEventListener('click', () => {
-    if (commentForm.style.display === 'none') {
-      commentForm.style.display = 'block';
-      commentTrigger.textContent="닫기"
-    } else {
-      commentForm.style.display = 'none';
-      commentTrigger.textContent="댓글 쓰기"
-    }
-  });
-
-// 답변에 대한 댓글 쓰기 이벤트 처리
-document.querySelectorAll('.answer-comment-trigger').forEach(trigger => {
-  trigger.addEventListener('click', () => {
-    const answerId = trigger.dataset.answerId;
-    const form = document.querySelector(`.answer-comment-form[data-answer-id="${answerId}"]`);
-
-    if (form.style.display === 'none') {
-      form.style.display = 'block';
-      trigger.textContent = "닫기";
-    } else {
-      form.style.display = 'none';
-      trigger.textContent = "댓글 쓰기";
-    }
-  });
-});
-  window.addEventListener('beforeunload', () => {
-    commentForm.style.display = 'none';
-  });
-  const delete_elements = document.getElementsByClassName("delete");
-  Array.from(delete_elements).forEach(function(element) {
-    element.addEventListener('click', function() {
-      if(confirm("정말로 삭제하시겠습니까?")) {
-        location.href = this.dataset.uri;
-      };
+    commentTrigger.addEventListener('click', () => {
+        if (commentForm.style.display === 'none') {
+            commentForm.style.display = 'block';
+            commentTrigger.textContent="닫기"
+        } else {
+            commentForm.style.display = 'none';
+            commentTrigger.textContent="댓글 쓰기"
+        }
     });
-  });
-  const recommend_elements = document.getElementsByClassName("recommend");
-  Array.from(recommend_elements).forEach(function(element) {
-    element.addEventListener('click', function() {
-      if(confirm("정말로 추천하시겠습니까?")) {
-        location.href = this.dataset.uri;
-      };
+
+    // 답변에 대한 댓글 쓰기 이벤트 처리
+    document.querySelectorAll('.answer-comment-trigger').forEach(trigger => {
+        trigger.addEventListener('click', () => {
+            const answerId = trigger.dataset.answerId;
+            const form = document.querySelector(`.answer-comment-form[data-answer-id="${answerId}"]`);
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+                trigger.textContent = "닫기";
+            } else {
+                form.style.display = 'none';
+                trigger.textContent = "댓글 쓰기";
+            }
+        });
     });
-  });
+    // window.addEventListener('beforeunload', () => {
+    //     commentForm.style.display = 'none';
+    // });
+    const delete_elements = document.getElementsByClassName("delete");
+    Array.from(delete_elements).forEach(function (element) {
+        element.addEventListener('click', function () {
+            if (confirm("정말로 삭제하시겠습니까?")) {
+                location.href = this.dataset.uri;
+            }
+            ;
+        });
+    });
+    const recommend_elements = document.getElementsByClassName("recommend");
+    Array.from(recommend_elements).forEach(function (element) {
+        element.addEventListener('click', function () {
+            if (confirm("정말로 추천하시겠습니까?")) {
+                location.href = this.dataset.uri;
+            }
+            ;
+        });
+    });
 </script>
 </html>
