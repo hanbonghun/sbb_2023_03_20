@@ -1,12 +1,7 @@
 package com.mysite.sbb.user;
 
 import com.mysite.sbb.DataNotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -43,7 +38,7 @@ public class UserService {
         return user;
     }
 
-    public SiteUser getUser(String username) {
+    public SiteUser getUserByUsername(String username) {
         Optional<SiteUser> siteUser = this.userRepository.findByusername(username);
         if (siteUser.isPresent()) {
             return siteUser.get();
@@ -52,14 +47,14 @@ public class UserService {
         }
     }
 
-    public SiteUser findByEmail(String email){
+    public SiteUser getUserByEmail(String email){
         Optional<SiteUser> siteUser = this.userRepository.findByEmail(email);
         if(siteUser.isPresent()){
             SiteUser user = siteUser.get();
             if(user.getGoogleId()==null) user.setGoogleId(email);
             return user;
         }else{
-            throw new DataNotFoundException("siteuser not found");
+            return null;
         }
     }
 
@@ -99,8 +94,14 @@ public class UserService {
                 siteUser = this.findByGoogleId(providerId);
             }
         } else if(principal instanceof UsernamePasswordAuthenticationToken){
-            siteUser = this.getUser(principal.getName());
+            siteUser = this.getUserByUsername(principal.getName());
         }
         return siteUser;
+    }
+
+    //비밀번호 변경
+    public void updatePassword(SiteUser siteUser,String password){
+        siteUser.setPassword(passwordEncoder.encode(password));
+        this.userRepository.save(siteUser);
     }
 }

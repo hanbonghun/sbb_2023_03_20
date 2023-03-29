@@ -5,6 +5,9 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+# application-secret.properties 파일을 추가
+.properties
+
 ### STS ###
 .apt_generated
 .classpath

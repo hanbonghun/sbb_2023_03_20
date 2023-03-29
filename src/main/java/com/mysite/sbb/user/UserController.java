@@ -1,5 +1,6 @@
 package com.mysite.sbb.user;
 
+import com.mysite.sbb.MailService;
 import com.mysite.sbb.answer.Answer;
 import com.mysite.sbb.answer.AnswerService;
 import com.mysite.sbb.question.Question;
@@ -38,6 +39,7 @@ public class UserController {
     private final QuestionService questionService;
     private final AnswerService answerService;
     private final AuthenticationManager authenticationManager;
+    private final MailService mailService;
 
     @GetMapping("/signup")
     public String signup(UserCreateForm userCreateForm) {
@@ -100,7 +102,9 @@ public class UserController {
             siteUser = this.userService.findByGoogleId(providerId);
         }
         //이미 소셜 계정이 가입되어 있다면
-        if(siteUser==null) return "signup_nickname_form";
+        if(siteUser==null) {
+            return "signup_nickname_form";
+        }
         else  return "redirect:/";
     }
     @PostMapping("/signupNickname")
@@ -111,9 +115,9 @@ public class UserController {
             return "signup_nickname_form";
         }
         OAuth2User oAuth2User = ((OAuth2AuthenticationToken) principal).getPrincipal();
-        String email = oAuth2User.getAttribute("email");
+//        String email = oAuth2User.getAttribute("email");
         String google_id = oAuth2User.getAttribute("sub");
-        this.userService.createGoogleUser(email,userCreateForm.getNickname(), google_id);
+        this.userService.createGoogleUser(null,userCreateForm.getNickname(), google_id);
         return "redirect:/";
     }
 
@@ -140,4 +144,21 @@ public class UserController {
         return "profile";
     }
 
+    @GetMapping("/forgot")
+    public String forgot (){
+        return "forgot";
+    }
+
+    @PostMapping("/find")
+    public String forgot(@RequestParam("email") String email, Model model){
+        SiteUser siteUser = this.userService.getUserByEmail(email);
+        if (siteUser == null) {
+            model.addAttribute("error", "존재하지 않는 이메일입니다.");
+            return "redirect:/user/login";
+        }
+        String subject = "회원님의 계정 정보입니다.";
+        this.mailService.sendMail(email);
+        model.addAttribute("success", "입력하신 이메일로 계정 정보를 보내드렸습니다.");
+        return "redirect:/user/login";
+    }
 }
