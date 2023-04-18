@@ -1,0 +1,29 @@
+<html layout:decorate="~{board_layout}">
+<div layout:fragment="content" class="container my-3">
+<!--  <h2 th:text="${siteUser.nickname}"></h2>-->
+  <hr>
+  <nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+      <button class="nav-link active" id="nav-base-tab" data-bs-toggle="tab" data-bs-target="#nav-base" type="button" role="tab" aria-controls="nav-base" aria-selected="true">기본 정보</button>
+      <button class="nav-link" id="nav-question-tab" data-bs-toggle="tab" data-bs-target="#nav-question" type="button" role="tab" aria-controls="nav-question" aria-selected="false">게시글</button>
+      <button class="nav-link" id="nav-answer-tab" data-bs-toggle="tab" data-bs-target="#nav-answer" type="button" role="tab" aria-controls="nav-answer" aria-selected="false">답변</button>
+      <button class="nav-link" id="nav-answer-comment" data-bs-toggle="tab" data-bs-target="#nav-comment" type="button" role="tab" aria-controls="nav-comment" aria-selected="false">댓글</button>
+    </div>
+  </nav>
+  <div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade show active" id="nav-base" role="tabpanel" aria-labelledby="nav-base-tab">
+      <div th:include="fragments/profile_fragment::profile_fragment"></div>
+    </div>
+    <div class="tab-pane fade" id="nav-question" role="tabpanel" aria-labelledby="nav-question-tab">
+      <div th:include="fragments/question_list_fragment :: questionList"></div>
+    </div>
+    <div class="tab-pane fade" id="nav-answer" role="tabpanel" aria-labelledby="nav-answer-tab">
+      <div th:include="fragments/question_list_fragment :: answerList"></div>
+    </div>
+    <div class="tab-pane fade" id="nav-comment" role="tabpanel" aria-labelledby="nav-comment-tab">
+      h4
+    </div>
+
+  </div>
+</div>
+</html>

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import com.mysite.sbb.answer.Answer;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -36,6 +37,10 @@ public class QuestionService {
     public Page<Question> getQuestionListByNickname(int page, int pageSize, String nickname) {
         Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("createDate").descending());
         return this.questionRepository.findByAuthorNickname(nickname,pageable);
+    }
+
+    public List<Question> getQuestionListByUserId(Long userId) {
+        return this.questionRepository.findByAuthorId(userId);
     }
 
     public Question getQuestion(Integer id) {

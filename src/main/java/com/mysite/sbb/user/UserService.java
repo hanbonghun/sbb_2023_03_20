@@ -68,6 +68,15 @@ public class UserService {
         }
     }
 
+    public SiteUser findById(Long user_id){
+        Optional<SiteUser> siteUser = this.userRepository.findById(user_id);
+        if(siteUser.isPresent()){
+            SiteUser user = siteUser.get();
+            return user;
+        }else{
+            return null;
+        }
+    }
 
 
     public boolean isUsernameExists(String username) {
@@ -103,5 +112,14 @@ public class UserService {
     public void updatePassword(SiteUser siteUser,String password){
         siteUser.setPassword(passwordEncoder.encode(password));
         this.userRepository.save(siteUser);
+    }
+
+    //회원 삭제
+    public void delete(Long userId,Principal principal){
+        SiteUser curr = this.getSiteUser(principal);
+        SiteUser siteUser = this.findById(userId);
+        if(curr.getId()!=userId) return ;
+
+        this.userRepository.delete(siteUser);
     }
 }

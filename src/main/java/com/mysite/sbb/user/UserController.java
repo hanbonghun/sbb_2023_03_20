@@ -3,9 +3,11 @@ package com.mysite.sbb.user;
 import com.mysite.sbb.MailService;
 import com.mysite.sbb.answer.Answer;
 import com.mysite.sbb.answer.AnswerService;
+import com.mysite.sbb.comment.Comment;
 import com.mysite.sbb.question.Question;
 import com.mysite.sbb.answer.AnswerInfo;
 import com.mysite.sbb.question.QuestionService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Page;
@@ -77,7 +79,7 @@ public class UserController {
                 userCreateForm.getEmail(), userCreateForm.getNickname(), userCreateForm.getPassword1());
 
         // 로그인 성공
-        return "redirect:/";
+        return "redirect:/user/login";
     }
 
     @GetMapping("/login/oauth2/code/google")
@@ -161,4 +163,38 @@ public class UserController {
         model.addAttribute("success", "입력하신 이메일로 계정 정보를 보내드렸습니다.");
         return "redirect:/user/login";
     }
+
+    @GetMapping("/profile/base/{userId}")
+    public String baseProfile(@PathVariable Long userId,  @RequestParam(value = "page", defaultValue = "1") int page, Model model){
+
+        SiteUser siteUser = this.userService.findById(userId);
+        Page<Question> questionList = this.questionService.getQuestionListByNickname(page,10, siteUser.getNickname());
+        model.addAttribute("questionList", questionList);
+        return "";
+    }
+
+    @Transactional
+    @PostMapping("/updateNickname")
+    public String updateNickname(@RequestParam("id") Long id, @RequestParam("nickname") String nickname) {
+        SiteUser siteUser = this.userService.findById(id);
+        siteUser.setNickname(nickname);
+        return "redirect:/"; // 처리 후 마이페이지로 이동
+    }
+
+    @Transactional
+    @PostMapping("/delete")
+    public String deleteUser(@RequestParam("id") Long id,Principal principal) {
+        SiteUser curr = this.userService.getSiteUser(principal);
+        SiteUser siteUser = this.userService.findById(id);
+
+        //삭제 불가
+        if(curr.getId()!=siteUser.getId()) return "redirect:/";
+        List<Question> questions = this.questionService.getQuestionListByUserId(id);
+        for(Question q : questions) this.questionService.delete(q);
+
+        this.userService.delete(id,principal);
+        return "redirect:/user/logout"; // 처리 후 마이페이지로 이동
+
+    }
+
 }

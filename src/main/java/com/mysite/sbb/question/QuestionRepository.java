@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 
 public interface QuestionRepository extends JpaRepository<Question,Integer> {
@@ -18,4 +20,6 @@ public interface QuestionRepository extends JpaRepository<Question,Integer> {
     @Query("select q from Question q join q.author u where u.nickname like %:nickname%")
     Page<Question> findByAuthorNickname(@Param("nickname") String nickname, Pageable pageable);
 
+    @Query("SELECT q FROM Question q WHERE q.author.id = :authorId")
+    List<Question> findByAuthorId(@Param("authorId") Long authorId);
 }

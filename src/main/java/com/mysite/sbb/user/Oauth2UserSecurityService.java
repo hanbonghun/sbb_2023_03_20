@@ -1,5 +1,6 @@
 package com.mysite.sbb.user;
 
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -7,6 +8,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
+import java.util.Map;
 
 @Service
 public class Oauth2UserSecurityService extends DefaultOAuth2UserService {
@@ -27,3 +29,5 @@ public class Oauth2UserSecurityService extends DefaultOAuth2UserService {
         return super.loadUser(userRequest);
     }
 }
+
+

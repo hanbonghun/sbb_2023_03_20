@@ -12,17 +12,17 @@ public class SiteUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, length =100)
     private String username;
 
     private String password;
 
-    @Column(unique = true)
+    @Column(unique = true, length =100)
     private String nickname;
 
-    @Column(unique = true)
+    @Column(unique = true, length =100)
     private String email;
 
-    @Column(unique = true)
+    @Column(unique = true, length =100)
     private String googleId;
 }
