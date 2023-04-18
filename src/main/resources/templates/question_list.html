@@ -18,36 +18,33 @@
             </div>
         </div>
     </div>
-    <table class="table">
-        <table class="table">
-            <thead class="table-dark">
-            <tr class="text-center">
-                <th>번호</th>
-                <th style="width:50%">제목</th>
-                <th>글쓴이</th>
-                <th>조회</th>
-                <th>작성일시</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="question, loop : ${paging}">
-                <td class="text-center" th:text="${paging.getTotalElements()  -paging.number*pageSize - loop.count +1 }"></td>
-                <td style="padding-left: 30px">
-                    <a th:href="@{|/question/detail/${question.id}?category=${category}|}" th:text="${question.subject}"></a>
-                    <span class="text-danger small ms-2"
-                          th:if="${#lists.size(question.answerList) > 0}"
-                          th:text="${#lists.size(question.answerList)}">
-                    </span>
-                </td>
-                <td class="text-center"><span th:if="${question.author != null}" th:text="${question.author.nickname}"></span></td>
-                <td class="text-center"><span  th:text="${question.viewCount}"></span></td>
-                <td class="text-center" th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
-            </tr>
-            </tbody>
-        </table>
+    <ul>
+        <li th:each="question, loop : ${paging}">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <small class="text-center"><span th:if="${question.author != null}"
+                                                     th:text="${question.author.nickname}"></span></small>
+                    <small class="text-center" th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></small>
+                </div>
+                <div>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M8.834.066c.763.087 1.5.295 2.01.884.505.581.656 1.378.656 2.3 0 .467-.087 1.119-.157 1.637L11.328 5h1.422c.603 0 1.174.085 1.668.333.508.254.911.679 1.137 1.2.453.998.438 2.447.188 4.316l-.04.306c-.105.79-.195 1.473-.313 2.033-.131.63-.315 1.209-.668 1.672C13.97 15.847 12.706 16 11 16c-1.848 0-3.234-.333-4.388-.653-.165-.045-.323-.09-.475-.133-.658-.186-1.2-.34-1.725-.415A1.75 1.75 0 0 1 2.75 16h-1A1.75 1.75 0 0 1 0 14.25v-7.5C0 5.784.784 5 1.75 5h1a1.75 1.75 0 0 1 1.514.872c.258-.105.59-.268.918-.508C5.853 4.874 6.5 4.079 6.5 2.75v-.5c0-1.202.994-2.337 2.334-2.184ZM4.5 13.3c.705.088 1.39.284 2.072.478l.441.125c1.096.305 2.334.598 3.987.598 1.794 0 2.28-.223 2.528-.549.147-.193.276-.505.394-1.07.105-.502.188-1.124.295-1.93l.04-.3c.25-1.882.189-2.933-.068-3.497a.921.921 0 0 0-.442-.48c-.208-.104-.52-.174-.997-.174H11c-.686 0-1.295-.577-1.206-1.336.023-.192.05-.39.076-.586.065-.488.13-.97.13-1.328 0-.809-.144-1.15-.288-1.316-.137-.158-.402-.304-1.048-.378C8.357 1.521 8 1.793 8 2.25v.5c0 1.922-.978 3.128-1.933 3.825a5.831 5.831 0 0 1-1.567.81ZM2.75 6.5h-1a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h1a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path></svg>
+                    <small class="text-danger" th:text="${#lists.size(question.voter)}"></small>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+                        <path d="M1 2.75C1 1.784 1.784 1 2.75 1h10.5c.966 0 1.75.784 1.75 1.75v7.5A1.75 1.75 0 0 1 13.25 12H9.06l-2.573 2.573A1.458 1.458 0 0 1 4 13.543V12H2.75A1.75 1.75 0 0 1 1 10.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h4.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+                    </svg><small class="text-danger" style="margin-left:3px" th:text="${#lists.size(question.answerList)}"></small>
+                </div>
+            </div>
+            <div>
+                <a style="font-weight: bold" class="font-weight-bold" th:href="@{|/question/detail/${question.id}?category=${category}|}"
+                   th:text="${question.subject}"></a>
+            </div>
+            <hr>
+        </li>
+    </ul>
+
         <!-- 페이징처리 시작 -->
         <div th:if="${!paging.isEmpty()}">
-            <ul class="pagination justify-content-center">
+            <ul class="pagination mb-3 justify-content-center">
                 <li class="page-item" th:if="${paging.hasPrevious}" >
                     <a class="page-link" href="javascript:void(0)" th:data-page="${paging.number}">
                         <span>이전</span>
