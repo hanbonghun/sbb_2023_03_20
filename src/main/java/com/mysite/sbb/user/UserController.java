@@ -4,6 +4,7 @@ import com.mysite.sbb.MailService;
 import com.mysite.sbb.answer.Answer;
 import com.mysite.sbb.answer.AnswerService;
 import com.mysite.sbb.comment.Comment;
+import com.mysite.sbb.comment.CommentService;
 import com.mysite.sbb.question.Question;
 import com.mysite.sbb.answer.AnswerInfo;
 import com.mysite.sbb.question.QuestionService;
@@ -40,6 +41,7 @@ public class UserController {
     private final UserService userService;
     private final QuestionService questionService;
     private final AnswerService answerService;
+    private final CommentService commentService;
     private final AuthenticationManager authenticationManager;
     private final MailService mailService;
 
@@ -190,7 +192,11 @@ public class UserController {
         //삭제 불가
         if(curr.getId()!=siteUser.getId()) return "redirect:/";
         List<Question> questions = this.questionService.getQuestionListByUserId(id);
+        List<Answer> answers = this.answerService.getAnswerListByUserId(id);
+        List<Comment> comments = this.commentService.getCommentListByUserId(id);
         for(Question q : questions) this.questionService.delete(q);
+        for(Answer a : answers) this.answerService.delete(a);
+        for(Comment c :comments) this.commentService.delete(c);
 
         this.userService.delete(id,principal);
         return "redirect:/user/logout"; // 처리 후 마이페이지로 이동

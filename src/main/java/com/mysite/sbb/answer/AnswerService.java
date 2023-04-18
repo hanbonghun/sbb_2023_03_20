@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -35,6 +36,10 @@ public class AnswerService {
         } else {
             throw new DataNotFoundException("answer not found");
         }
+    }
+
+    public List<Answer> getAnswerListByUserId(Long userId) {
+        return this.answerRepository.findByAuthorId(userId);
     }
 
     public void modify(Answer answer, String content) {

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -27,6 +28,11 @@ public class CommentService {
             throw new DataNotFoundException("comment not found");
         }
     }
+
+    public List<Comment> getCommentListByUserId(Long userId) {
+        return this.commentRepository.findByAuthorId(userId);
+    }
+
 
     public void createAnswerComment(int answerId, String content, SiteUser siteUser) {
         Answer answer = this.answerService.getAnswer(answerId);
@@ -51,5 +57,9 @@ public class CommentService {
     public void vote(Comment comment, SiteUser siteUser) {
         comment.getVoter().add(siteUser);
         this.commentRepository.save(comment);
+    }
+
+    public void delete(Comment comment) {
+        this.commentRepository.delete(comment);
     }
 }
